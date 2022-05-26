@@ -1,14 +1,17 @@
+const mongoose  = require("mongoose");
 
-function Multiply(c, d) {
-    return c * d;
-}
-function suma(a, b) {
-    return a + b
-}
-function resta(a, b) {
-    return a - b
+const dbConnection = async () => {
+
+    try {
+        await mongoose.connect(process.env.MONGO_CONN); 
+        console.log('DB Online')
+    } catch {
+        console.log(error);
+        throw new Error('Error al inicializar la base de datos');
+    }
+
 }
 
-function mult(a, b) {
-    return a * b
+module.exports = {
+    dbConnection
 }
