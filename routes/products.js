@@ -22,7 +22,31 @@ router.post('/new', async (req, res) => {
         })
     }
 })
-
+router.get('/highlight', async (req, res) => {
+    try {
+        const productList = await Product
+                                    .find({productIsHighLight: true, productIsActive:true})
+                                    .populate({
+                                        path:'productCategories', 
+                                        select: '_id categoryName',
+                                        match: { categoryIsActive: true},
+                                        populate: { 
+                                            path: 'categorySupId', 
+                                            match: { categoryIsActive: true},
+                                            select: '_id categoryName' 
+                                        }})
+            res.status(200).json({
+                ok: true,
+                productList
+            })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            ok: false,
+            msg: 'Error'
+        })
+    }
+})
 router.get('/name/:productName', async (req, res) => {
     let { productName } = req.params;
     
@@ -88,31 +112,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/highlight', async (req, res) => {
-    try {
-        const productList = await Product
-                                    .find({productIsHighLight: true, productIsActive:true})
-                                    .populate({
-                                        path:'productCategories', 
-                                        select: '_id categoryName',
-                                        match: { categoryIsActive: true},
-                                        populate: { 
-                                            path: 'categorySupId', 
-                                            match: { categoryIsActive: true},
-                                            select: '_id categoryName' 
-                                        }})
-            res.status(200).json({
-                ok: true,
-                productList
-            })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            ok: false,
-            msg: 'Error'
-        })
-    }
-})
+
 
 
 module.exports= router;
