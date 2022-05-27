@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     try {
         const productList = await Product
                                     .find()
-                                    .populate({path:'productCategories', populate: { path: 'categorySupId' }})
+                                    .populate({path:'productCategories', select: '_id categoryName categoryIsActive', populate: { path: 'categorySupId', select: '_id categoryName categoryIsActive' }})
             res.status(200).json({
                 ok: true,
                 productList
@@ -45,26 +45,30 @@ router.get('/', async (req, res) => {
     }
 })
 
-
-/*
-
-//                                     Story
-// .find(...)
-// .populate({
-//   path: 'fans',
-//   match: { age: { $gte: 21 }},
-//   select: 'name -_id',
-//   options: { limit: 5 }
-// })
-// .exec()
-
-User.
-  findOne({ name: 'Val' }).
-  populate({
-    path: 'friends',
-    // Get friends of friends - populate the 'friends' array for every friend
-    populate: { path: 'friends' }
-  });
-*/
+router.get('/highlight', async (req, res) => {
+    try {
+        const productList = await Product
+                                    .find({productIsHighLight: true, productIsActive:true})
+                                    .populate({
+                                        path:'productCategories', 
+                                        select: '_id categoryName',
+                                        match: { categoryIsActive: true},
+                                        populate: { 
+                                            path: 'categorySupId', 
+                                            match: { categoryIsActive: true},
+                                            select: '_id categoryName' 
+                                        }})
+            res.status(200).json({
+                ok: true,
+                productList
+            })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            ok: false,
+            msg: 'Error'
+        })
+    }
+})
 
 module.exports= router;
