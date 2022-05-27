@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     try {
         const productList = await Product
                                     .find()
-                                    .populate('productCategories')
+                                    .populate({path:'productCategories', populate: { path: 'categorySupId' }})
             res.status(200).json({
                 ok: true,
                 productList
@@ -58,7 +58,13 @@ router.get('/', async (req, res) => {
 // })
 // .exec()
 
-
+User.
+  findOne({ name: 'Val' }).
+  populate({
+    path: 'friends',
+    // Get friends of friends - populate the 'friends' array for every friend
+    populate: { path: 'friends' }
+  });
 */
 
 module.exports= router;
