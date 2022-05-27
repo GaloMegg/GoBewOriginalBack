@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const Categories = require("./Category");
 
 
 const ProductSchema = new Schema({
@@ -29,9 +30,16 @@ const ProductSchema = new Schema({
     },
     productCreationDate: {
         type: Date, default: Date.now
-         
+    },
 
-    }
+    productCategories: [
+        {
+            type: Schema.ObjectId,
+            ref: 'Categories',
+            required: true
+        }
+    ]
+
 });
 
 

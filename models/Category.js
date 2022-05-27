@@ -10,7 +10,6 @@ const CategorySchema = new Schema({
         default: true
     },
     categorySupId : {
-        // type : Number,
         type: Schema.Types.ObjectId,
         ref: 'Categories',
         default: null
