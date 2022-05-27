@@ -23,7 +23,18 @@ router.post('/new', async (req, res) => {
     }
 })
 
-router.get('/:categoryId', async (req, res) => {
+router.get('/name/:productName', async (req, res) => {
+    let { productName } = req.params;
+    
+    try {
+        const products = await Product.find({ productName : { $regex: '.*' + productName + '.*' } })
+        res.json(products)
+    } catch (error) {
+        res.status(400).json({err: 'Ha ocurrido un error.'})
+    }
+})
+
+router.get('cat/:categoryId', async (req, res) => {
     const { categoryId } = req.params;
     try {
         // const products = await
