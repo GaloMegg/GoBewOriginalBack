@@ -25,7 +25,32 @@ router.post('/new', async (req, res) => {
 })
 
 //TODO: add ProductCategory en el insert del product, TRANSACTION BULKSAVE
-
+router.get('/:productId', async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const productList = await Product
+                                    .find({_id: productId})
+                                    .populate({
+                                        path:'productCategories', 
+                                        select: '_id categoryName',
+                                        match: { categoryIsActive: true},
+                                        populate: { 
+                                            path: 'categorySupId', 
+                                            match: { categoryIsActive: true},
+                                            select: '_id categoryName' 
+                                        }})
+            res.status(200).json({
+                ok: true,
+                productList
+            })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            ok: false,
+            msg: 'Error'
+        })
+    }
+})
 
 router.get('/', async (req, res) => {
     try {
@@ -70,5 +95,6 @@ router.get('/highlight', async (req, res) => {
         })
     }
 })
+
 
 module.exports= router;
