@@ -9,14 +9,12 @@ router.post('/new', async (req, res) => {
     const { productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories } = req.body;
     try {
     
-        const newPorduct = new Product({productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight})   
+        const newPorduct = new Product({productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories})   
         await newPorduct.save()
 
         res.status(201).json({
             ok: true,
-            porduct: newPorduct,
-            cat: pCategory,
-            productCategories
+            porduct: newPorduct
         })
     } catch (error) {
         res.json({
@@ -31,7 +29,9 @@ router.post('/new', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const productList = await Product.find()
+        const productList = await Product
+                                    .find()
+                                    .populate('productCategories')
             res.status(200).json({
                 ok: true,
                 productList
@@ -45,5 +45,20 @@ router.get('/', async (req, res) => {
     }
 })
 
+
+/*
+
+//                                     Story
+// .find(...)
+// .populate({
+//   path: 'fans',
+//   match: { age: { $gte: 21 }},
+//   select: 'name -_id',
+//   options: { limit: 5 }
+// })
+// .exec()
+
+
+*/
 
 module.exports= router;
