@@ -1,5 +1,7 @@
 const { Router } = require('express');
-const Categories = require('../models/categories');
+const { Promise } = require('mongoose');
+const { getCategoriesBySup } = require('../controllers/category');
+const Categories = require('../models/Category');
 
 const router = Router();
 
@@ -26,6 +28,22 @@ router.get('/:categoryId', async (req, res) => {
     try {
         
         const category = await Categories.findById(categoryId.toString())
+        // if(!category) throw 'No existe una categoría con el id seleccionado.'
+        // if(!category) res.status(404).send('No existe una categoría con el id seleccionado')
+
+        res.status(201).json(category);
+    } catch (error) {
+        res.status(404).send('No existe una categoría con el id seleccionado')
+        
+    }
+})
+
+router.get('/', async (req, res) => {
+    const { categoryId } = req.params;
+    try {
+        
+        const category = await  Categories.find()
+
         // if(!category) throw 'No existe una categoría con el id seleccionado.'
         // if(!category) res.status(404).send('No existe una categoría con el id seleccionado')
 
