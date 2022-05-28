@@ -107,8 +107,23 @@ router.get('/:productId', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const productList = await Product
-                                    .find()
-                                    .populate({path:'productCategories', select: '_id categoryName categoryIsActive', populate: { path: 'categorySupId', select: '_id categoryName categoryIsActive' }})
+            .aggregate([
+                // {$match: {productIsHighLight: true, productIsActive:true}},
+                {$lookup: {
+                    from: 'images',
+                    localField:  '_id',
+                    foreignField:'productId',
+                    as: 'images'
+                }},
+                {$lookup: {
+                    from: 'categories',
+                    localField: 'productCategories',
+                    foreignField: '_id',
+                    as: 'categories'
+                }}
+            ])
+                                    // .find()
+                                    // .populate({path:'productCategories', select: '_id categoryName categoryIsActive', populate: { path: 'categorySupId', select: '_id categoryName categoryIsActive' }})
             res.status(200).json({
                 ok: true,
                 productList
