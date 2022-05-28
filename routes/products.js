@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const Images = require("../models/Images");
 const Product = require('../models/Product');
 
 const router = Router();
@@ -25,20 +26,29 @@ router.post('/new', async (req, res) => {
 router.get('/highlight', async (req, res) => {
     try {
         const productList = await Product
-                                    .find({productIsHighLight: true, productIsActive:true})
-                                    .populate({
-                                        path:'productCategories', 
-                                        select: '_id categoryName',
-                                        match: { categoryIsActive: true},
-                                        populate: { 
-                                            path: 'categorySupId', 
-                                            match: { categoryIsActive: true},
-                                            select: '_id categoryName' 
-                                        }})
-            res.status(200).json({
-                ok: true,
-                productList
-            })
+                        .aggregate([
+                            {$match: {productIsHighLight: true, productIsActive:true}},
+                            {$lookup: {
+                                from: 'images',
+                                localField:  '_id',
+                                foreignField:'productId',
+                                as: 'images'
+                            }},
+                            {$lookup: {
+                                from: 'categories',
+                                localField: 'productCategories',
+                                foreignField: '_id',
+                                as: 'categories'
+                            }}
+                        ])
+
+        
+        
+        res.status(200).json({
+            ok: true,
+            productList
+        })                            
+            
     } catch (error) {
         console.log(error)
         res.status(500).json({
