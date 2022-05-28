@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const mongoose = require("mongoose");
 
-const Images = require("../models/Images");
+// const Images = require("../models/Images");
 const Product = require('../models/Product');
 const router = Router();
 
@@ -29,24 +29,22 @@ router.post('/new', async (req, res) => {
 router.get('/highlight', async (req, res) => {
     try {
         const productList = await Product
-                        .aggregate([
-                            {$match: {productIsHighLight: true, productIsActive:true}},
-                            {$lookup: {
-                                from: 'images',
-                                localField:  '_id',
-                                foreignField:'productId',
-                                as: 'images'
-                            }},
-                            {$lookup: {
-                                from: 'categories',
-                                localField: 'productCategories',
-                                foreignField: '_id',
-                                as: 'categories'
-                            }}
-                        ])
+            .aggregate([
+                {$match: {productIsHighLight: true, productIsActive:true}},
+                {$lookup: {
+                    from: 'images',
+                    localField:  '_id',
+                    foreignField:'productId',
+                    as: 'images'
+                }},
+                {$lookup: {
+                    from: 'categories',
+                    localField: 'productCategories',
+                    foreignField: '_id',
+                    as: 'categories'
+                }}
+            ])
 
-        
-        
         res.status(200).json({
             ok: true,
             productList
@@ -65,7 +63,6 @@ router.get('/name/:productName', async (req, res) => {
     
     try {
         const products = await Product
-        // .find({ productName : { $regex: '.*' + productName + '.*' } })
         .aggregate([
             {$match: { productName : { $regex: '.*' + productName + '.*' }, productIsActive:true }},
             {$lookup: {
@@ -87,18 +84,30 @@ router.get('/name/:productName', async (req, res) => {
     }
 })
 
-router.get('cat/:categoryId', async (req, res) => {
-    const { categoryId } = req.params;
+router.get('/category/:categoryId', async (req, res) => {
+    const { categoryId }= req.params;
     try {
-        // const products = await
-    } catch (error) {
+        const products = await Product
+            .aggregate([
+                { $lookup:{
+                         from: "categories",
+                         pipeline: [
+                            {$match: { $or: [{_id : ObjectId(categoryId)}, { categorySupId: ObjectId(categoryId) }] }}
+                         ],
+                         as: "categories"
+                       }
+                  }
+            ])
+        res.json(products)
         
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({err: 'Ha ocurrido un error.'})
     }
 })
 
 router.get('/:productId', async (req, res) => {
     const { productId } = req.params;
-    // console.log(productId)
     try {
         const productList = await Product
         .aggregate([

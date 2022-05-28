@@ -27,7 +27,7 @@ router.get('/:categoryId', async (req, res) => {
     const { categoryId } = req.params;
     try {
         
-        const category = await Categories.findById(categoryId.toString())
+        const category = await Categories.findById(categoryId)
         // if(!category) throw 'No existe una categoría con el id seleccionado.'
         // if(!category) res.status(404).send('No existe una categoría con el id seleccionado')
 
@@ -41,8 +41,6 @@ router.get('/:categoryId', async (req, res) => {
 router.get('/', async (req, res) => {
     
     try {
-        
-        // const category = await  Categories.find()
         const category = await  Categories
         .aggregate([
             {$match: { categorySupId: null }},
