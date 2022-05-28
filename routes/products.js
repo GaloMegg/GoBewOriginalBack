@@ -1,8 +1,11 @@
 const { Router } = require("express");
+const mongoose = require("mongoose");
+
 const Images = require("../models/Images");
 const Product = require('../models/Product');
-
 const router = Router();
+
+const ObjectId = mongoose.Types.ObjectId;
 
 
 router.post('/new', async (req, res) => {
@@ -95,18 +98,25 @@ router.get('cat/:categoryId', async (req, res) => {
 
 router.get('/:productId', async (req, res) => {
     const { productId } = req.params;
+    // console.log(productId)
     try {
         const productList = await Product
-                                    .find({_id: productId})
-                                    .populate({
-                                        path:'productCategories', 
-                                        select: '_id categoryName',
-                                        match: { categoryIsActive: true},
-                                        populate: { 
-                                            path: 'categorySupId', 
-                                            match: { categoryIsActive: true},
-                                            select: '_id categoryName' 
-                                        }})
+        .aggregate([
+            {$match: { _id:  ObjectId(productId), productIsActive:true }},
+            {$lookup: {
+                from: 'images',
+                localField:  '_id',
+                foreignField:'productId',
+                as: 'images'
+            }},
+            {$lookup: {
+                from: 'categories',
+                localField: 'productCategories',
+                foreignField: '_id',
+                as: 'categories'
+            }}
+        ])        
+
             res.status(200).json({
                 ok: true,
                 productList
