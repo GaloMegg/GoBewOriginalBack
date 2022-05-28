@@ -61,7 +61,23 @@ router.get('/name/:productName', async (req, res) => {
     let { productName } = req.params;
     
     try {
-        const products = await Product.find({ productName : { $regex: '.*' + productName + '.*' } })
+        const products = await Product
+        // .find({ productName : { $regex: '.*' + productName + '.*' } })
+        .aggregate([
+            {$match: { productName : { $regex: '.*' + productName + '.*' }, productIsActive:true }},
+            {$lookup: {
+                from: 'images',
+                localField:  '_id',
+                foreignField:'productId',
+                as: 'images'
+            }},
+            {$lookup: {
+                from: 'categories',
+                localField: 'productCategories',
+                foreignField: '_id',
+                as: 'categories'
+            }}
+        ])
         res.json(products)
     } catch (error) {
         res.status(400).json({err: 'Ha ocurrido un error.'})
