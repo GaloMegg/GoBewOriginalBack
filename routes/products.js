@@ -12,12 +12,12 @@ router.post('/new', async (req, res) => {
     const { productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories } = req.body;
     try {
     
-        const newPorduct = new Product({productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories})   
-        await newPorduct.save()
+        const newProduct = new Product({productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories})   
+        await newProduct.save()
 
         res.status(201).json({
             ok: true,
-            porduct: newPorduct
+            product: newProduct
         })
     } catch (error) {
         res.json({
