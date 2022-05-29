@@ -3,8 +3,9 @@ const cors = require('cors')
 const { dbConnection } = require('./database/config')
 const productRouter = require('./routes/products')
 const categoryRouter = require('./routes/categories')
+const usersRouter = require('./routes/users')
 const imageRouter = require('./routes/images')
-//TODO: instalar morgan
+//TODO/users instalar morgan
 
 
 require('dotenv').config();
@@ -25,7 +26,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 // app.use('/', indexRouter);
-// app.use('/users', usersRouter);
+app.use('/users', usersRouter);
 app.use('/product', productRouter)
 app.use('/images', imageRouter)
 app.use('/categories', categoryRouter)

@@ -1,6 +1,6 @@
 const { Router } = require('express');
-const { Promise } = require('mongoose');
-const { getCategoriesBySup } = require('../controllers/category');
+// const { Promise } = require('mongoose');
+// const { getCategoriesBySup } = require('../controllers/category');
 const Categories = require('../models/Category');
 
 const router = Router();
