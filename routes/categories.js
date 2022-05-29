@@ -52,9 +52,6 @@ router.get('/', async (req, res) => {
             }}
         ])
 
-        // if(!category) throw 'No existe una categoría con el id seleccionado.'
-        // if(!category) res.status(404).send('No existe una categoría con el id seleccionado')
-
         res.status(201).json(category);
     } catch (error) {
         res.status(404).send('No existe una categoría con el id seleccionado')
