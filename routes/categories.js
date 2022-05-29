@@ -59,5 +59,18 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/bySup/:categoryId', async (req, res) => {
+    const { categoryId } = req.params;
+    try {
+        const category = await  Categories
+        .find({ categorySupId: categoryId })
+
+        res.status(201).json(category);
+    } catch (error) {
+        res.status(404).send('No existe una categoría con el id seleccionado')
+        
+    }
+})
+
 
 module.exports = router;
