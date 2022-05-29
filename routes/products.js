@@ -64,7 +64,8 @@ router.get('/name/:productName', async (req, res) => {
     try {
         const products = await Product
         .aggregate([
-            {$match: { productName : { $regex: '.*' + productName + '.*' }, productIsActive:true }},
+            // {'$regex' : '^string$'}
+            {$match: { productName : { $regex: '.*' + productName + '.*', '$options' : 'i' }, productIsActive:true }},
             {$lookup: {
                 from: 'images',
                 localField:  '_id',
