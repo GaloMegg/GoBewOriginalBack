@@ -5,6 +5,7 @@ const Categories = require('../models/Category');
 
 const router = Router();
 
+//TODO: validar datos antes de insertar
 
 router.post('/new', async (req, res) => {
     try {
@@ -72,5 +73,20 @@ router.get('/bySup/:categoryId', async (req, res) => {
     }
 })
 
+router.put('/:categoryId', async (req, res) => {
+    const { categoryId } = req.params;
+    try {
+        const category = await  Categories
+        .findByIdAndUpdate(categoryId, req.body)
+
+        res.status(201).json(category);
+    } catch (error) {
+        res.status(404).send('No existe una categoría con el id seleccionado')
+        
+    }
+})	
+
+
+//TODO: delete Category Sólo se puede borrar sii no tiene subcategorías ni productos asociados a ninguna de las subcategories.
 
 module.exports = router;
