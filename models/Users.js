@@ -1,40 +1,40 @@
 const { Schema, model } = require('mongoose')
 
 const UserSchema = new Schema({
-    userEmail:{
+    email:{
         type: String,
         unique: true,
         required: true
     },
-    userPassword:{
+    password:{
         type: String,
         required: true
     },
-    userIsActive:{
+    isActive:{
         type: Boolean,
         default: true
     },
-    userIsAdmin:{
+    isAdmin:{
         type: Boolean,
         default: false
     },
-    userCreationDate:{
+    creationDate:{
         type: Date,
         default: Date.now
     },
-    userIsGoogle:{
+    isGoogle:{
         type: Boolean,
         default: false
     },
-    userFirstName:{
+    firstName:{
         type: String,
         required: true
     },
-    userLastName:{
+    lastName:{
         type: String,
         required: true
     },
-    userIsSuperAdmin:{
+    isSuperAdmin:{
         type: Boolean,
         default: false
     }
