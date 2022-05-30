@@ -1,6 +1,6 @@
 const firstNameReq = 'El nombre es obligatorio.';
 const lastNameReq = 'El apellido es obligatorio.';
-const idInvalid = 'El no existe un usuario con ese id.';
+const idInvalid = 'El id es inválido.';
 
 module.exports = {
     firstNameReq,

@@ -1,5 +1,8 @@
 const { Router } = require("express");
+const { check } = require("express-validator");
 const mongoose = require("mongoose");
+const { createProduct, updateProduct } = require("../controllers/product");
+const { validateFields } = require("../middlewares/validateFields");
 
 // const Images = require("../models/Images");
 const Product = require('../models/Product');
@@ -8,24 +11,41 @@ const router = Router();
 const ObjectId = mongoose.Types.ObjectId;
 
 
-router.post('/new', async (req, res) => {
-    const { productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories } = req.body;
-    try {
-    
-        const newProduct = new Product({productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories})   
-        await newProduct.save()
-
-        res.status(201).json({
-            ok: true,
-            product: newProduct
-        })
-    } catch (error) {
-        res.json({
-            ok:false,
-            msg: error
-        })
-    }
-})
+router.post(
+    '/new', 
+    [
+        check('productName', 'El nombre del producto es obligatorio.').not().isEmpty(),
+        check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
+        check('productPrice', 'El precio del producto es obligatorio.').not().isEmpty(),
+        check('productPrice', 'El precio del producto debe ser un número.').isNumeric(),
+        check('productStock', 'El stock del producto es obligatorio.').not().isEmpty(),
+        check('productStock', 'El stock del producto debe ser un número.').isInt(),
+        check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
+        validateFields
+    ],
+    createProduct
+);
+router.put(
+    '/', 
+    [
+        check('productId').custom(value => {
+            return Product.findById(value).then(product => {
+              if (product.length<1) {
+                return Promise.reject(idInvalid);
+             }
+            });
+          }),
+        check('productName', 'El nombre del producto es obligatorio.').not().isEmpty(),
+        check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
+        check('productPrice', 'El precio del producto es obligatorio.').not().isEmpty(),
+        check('productPrice', 'El precio del producto debe ser un número.').isNumeric(),
+        check('productStock', 'El stock del producto es obligatorio.').not().isEmpty(),
+        check('productStock', 'El stock del producto debe ser un número.').isInt(),
+        check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
+        validateFields
+    ],
+    updateProduct
+);
 router.get('/highlight', async (req, res) => {
     try {
         const productList = await Product
@@ -58,6 +78,8 @@ router.get('/highlight', async (req, res) => {
         })
     }
 })
+
+
 router.get('/name/:productName', async (req, res) => {
     let { productName } = req.params;
     
