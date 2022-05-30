@@ -21,5 +21,23 @@ router.post('/new', async (req, res) => {
     }
 })
 
+router.delete('/:imageId', async (req, res) => {
+    const {  imageId } = req.params;
+
+    try {
+        
+        await Image.findByIdAndDelete(imageId);
+        res.status(201).json({
+            err: 'ok',
+            
+        });
+    } catch (error) {
+        res.status(501).json({
+            err: 'err',
+            msg: error
+        })
+    }
+})
+
 
 module.exports = router;
