@@ -1,8 +1,8 @@
 const { Router } = require('express');
-const { check, body, request } = require('express-validator');
+const { check } = require('express-validator');
 
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserAdmin } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const router = Router();
@@ -59,6 +59,16 @@ router.get(
         validateFields
     ],
     loginUser
+)
+
+router.get(
+    '/authAdmin', 
+    [
+        check('userEmail', 'El email es obligatorio').isEmail(),
+        check('userPassword', 'El password debe tener al menos 6 letras').isLength({ min: 6 }),
+        validateFields
+    ],
+    loginUserAdmin
 )
 
 router.get('/:userId', async (req, res) => {
