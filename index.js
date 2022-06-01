@@ -5,6 +5,7 @@ const productRouter = require('./routes/products')
 const categoryRouter = require('./routes/categories')
 const usersRouter = require('./routes/users')
 const imageRouter = require('./routes/images')
+const faqRouter = require('./routes/faqs')
 //TODO/users instalar morgan
 
 
@@ -30,6 +31,7 @@ app.use('/users', usersRouter);
 app.use('/product', productRouter)
 app.use('/images', imageRouter)
 app.use('/categories', categoryRouter)
+app.use('/faqs', faqRouter)
 
 
 app.listen(process.env.PORT, () => {
