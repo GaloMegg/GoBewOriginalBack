@@ -107,9 +107,52 @@ const loginUser = async (req, res) => {
         })
     }
 } 
+const loginUserAdmin = async (req, res) => {
+    const { userEmail, userPassword } = req.body;
+    try {
+        const user = await Users.findOne({userEmail, userIsActive:true, userIsAdmin: true});
+        //si no existe el user devuelve null
+        if ( !user ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario no encontrado.'
+            })
+        }
+
+        //Confirmar las passwords
+        const validPassword = bcrypt.compareSync(userPassword,user.userPassword); 
+        if (!validPassword) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Password incorrecta'
+            });
+        }
+        
+        //GENERAR JWT
+        const token = await generateJWT( user._id, user.userName );
+        
+        res.json({
+            ok: true,
+            userId: user._id,
+            userName: user.userName,
+            userLastName: user.userLastName,
+            userEmail: user.userEmail,
+            userIsSuperAdmin: user.userIsSuperAdmin,
+            userIsAdmin: user.userIsAdmin,
+            token
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Contraseña incorrecta'
+        })
+    }
+} 
 
 module.exports = {
     createUser,
     updateUser,
-    loginUser
+    loginUser,
+    loginUserAdmin
 }
