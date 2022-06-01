@@ -89,14 +89,14 @@ const loginUser = async (req, res) => {
         }
         
         //GENERAR JWT
-        const token = await generateJWT( user._id, user.userName );
+        const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
         
         res.json({
             ok: true,
             userId: user._id,
-            userName: user.userName,
-            userLastName: user.userLastName,
-            userEmail: user.userEmail,
+            userFirstName: user.userFirstName,
+            userIsSuperAdmin: user.userIsSuperAdmin,
+            userIsAdmin: user.userIsAdmin,
             token
         })
     } catch (error) {
@@ -118,25 +118,24 @@ const loginUserAdmin = async (req, res) => {
                 msg: 'Usuario no encontrado.'
             })
         }
-
+        // console.log(user.userPassword, userPassword);
         //Confirmar las passwords
-        const validPassword = bcrypt.compareSync(userPassword,user.userPassword); 
+        const validPassword = await bcrypt.compareSync(userPassword,user.userPassword); 
+        console.log(validPassword);
+
         if (!validPassword) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Password incorrecta'
             });
         }
-        
+        // console.log(user._id, user.userName)
         //GENERAR JWT
-        const token = await generateJWT( user._id, user.userName );
-        
+        const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
         res.json({
             ok: true,
             userId: user._id,
-            userName: user.userName,
-            userLastName: user.userLastName,
-            userEmail: user.userEmail,
+            userFirstName: user.userFirstName,
             userIsSuperAdmin: user.userIsSuperAdmin,
             userIsAdmin: user.userIsAdmin,
             token
@@ -150,9 +149,32 @@ const loginUserAdmin = async (req, res) => {
     }
 } 
 
+const renewToken = async (req, res = response)=>{
+
+    const { uid, name, isAdmin, isSuperAdmin } = req;
+    console.log(uid, name, isAdmin, isSuperAdmin)
+    try {
+        const token = await generateJWT( uid, name, isAdmin, isSuperAdmin );
+        res.json({
+            ok: true,
+            token,
+            userId:uid,
+            userFirstName:name,            
+            userIsSuperAdmin:isSuperAdmin,
+            userIsAdmin:isAdmin
+        })        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Token no válido'
+        })
+    }
+};
 module.exports = {
     createUser,
     updateUser,
     loginUser,
-    loginUserAdmin
+    loginUserAdmin,
+    renewToken
 }
