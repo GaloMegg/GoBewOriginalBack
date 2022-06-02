@@ -14,10 +14,11 @@ router.post('/new', async (req, res) => {
             image: newImage
         });
     } catch (error) {
-        res.status(501).json({
-            err: 'err',
-            msg: error
-        })
+        // res.status(501).json({
+        //     err: 'err',
+        //     msg: error
+        // })
+        console.log("problema tuyo")
     }
 })
 
