@@ -153,7 +153,7 @@ const loginUserAdmin = async (req, res) => {
 const renewToken = async (req, res = response)=>{
 
     const { uid, name, isAdmin, isSuperAdmin } = req;
-    console.log(uid, name, isAdmin, isSuperAdmin)
+    // console.log(uid, name, isAdmin, isSuperAdmin)
     try {
         const token = await generateJWT( uid, name, isAdmin, isSuperAdmin );
         res.json({

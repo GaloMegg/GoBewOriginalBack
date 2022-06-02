@@ -71,6 +71,22 @@ router.post(
 )
 router.get('/adminRenew',validateJWT, renewToken);
 
+router.get('/all', async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json({
+            ok: true,
+            users
+        })
+    } catch (error) {
+        res.json({
+            ok: false,
+            msg: 'Error: ' + error
+        })
+    }
+
+})
+
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
