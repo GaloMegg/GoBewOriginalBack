@@ -132,6 +132,7 @@ const loginUserAdmin = async (req, res) => {
         // console.log(user._id, user.userName)
         //GENERAR JWT
         const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
+        
         res.json({
             ok: true,
             userId: user._id,
