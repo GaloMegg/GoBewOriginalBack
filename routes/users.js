@@ -51,7 +51,7 @@ router.put(
      updateUser
 );
 
-router.get(
+router.post(
     '/auth', 
     [
         check('userEmail', 'El email es obligatorio').isEmail(),

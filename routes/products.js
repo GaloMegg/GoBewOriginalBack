@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
 const mongoose = require("mongoose");
+const { idInvalid } = require("../controllers/errMsg");
 const { createProduct, updateProduct } = require("../controllers/product");
 const { validateFields } = require("../middlewares/validateFields");
 
@@ -30,7 +31,7 @@ router.put(
     [
         check('productId').custom(value => {
             return Product.findById(value).then(product => {
-              if (product.length<1) {
+              if (!product) {
                 return Promise.reject(idInvalid);
              }
             });
@@ -42,6 +43,9 @@ router.put(
         check('productStock', 'El stock del producto es obligatorio.').not().isEmpty(),
         check('productStock', 'El stock del producto debe ser un número.').isInt(),
         check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
+        // check('productIsActive', 'EL estado debe ser true o false.').isBoolean(),
+        // check('productIsHighLight', 'EL estado destacado debe ser true o false.').isBoolean(),
+
         validateFields
     ],
     updateProduct
