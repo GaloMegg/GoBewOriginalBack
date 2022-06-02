@@ -23,7 +23,7 @@ mercadopago.configure({ access_token: process.env.ACCESS_TOKEN_TEST })
 
 router.post('/pay', async (req, res) => {
     // const { cart } = 
-    console.log(req.body)
+    // console.log(req.body)
     const id = 10
     //Cargar una orden en la base de datos y recuperar el ID 
 

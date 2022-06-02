@@ -70,7 +70,7 @@ router.post(
     ],
     loginUserAdmin
 )
-router.get('/adminRenew',validateJWT, renewToken);
+// router.get('/adminRenew',validateJWT, renewToken);
 
 router.get('/all', async (req, res) => {
     try {
