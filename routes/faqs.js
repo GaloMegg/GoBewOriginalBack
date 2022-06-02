@@ -13,7 +13,7 @@ const router = Router();
 const ObjectId = mongoose.Types.ObjectId;
 
 router.post(
-    '/new',
+    '/',
     [
         check('faqTitle', 'El titulo de la FAQ es obligatorio').not().isEmpty(),
         check('faqDescription', 'La descripcion es obligatoria').not().isEmpty(),
