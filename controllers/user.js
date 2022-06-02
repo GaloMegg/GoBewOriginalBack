@@ -155,10 +155,10 @@ const loginUserAdmin = async (req, res) => {
                 msg: 'Usuario no encontrado.'
             })
         }
-        // console.log(user.userPassword, userPassword);
+        
         //Confirmar las passwords
         const validPassword = await bcrypt.compareSync(userPassword,user.userPassword); 
-        console.log(validPassword);
+        
 
         if (!validPassword) {
             return res.status(400).json({
@@ -166,9 +166,9 @@ const loginUserAdmin = async (req, res) => {
                 msg: 'Password incorrecta'
             });
         }
-        // console.log(user._id, user.userName)
+        
         //GENERAR JWT
-        const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
+        // const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
         
         res.json({
             ok: true,
@@ -176,7 +176,7 @@ const loginUserAdmin = async (req, res) => {
             userFirstName: user.userFirstName,
             userIsSuperAdmin: user.userIsSuperAdmin,
             userIsAdmin: user.userIsAdmin,
-            token
+            // token
         })
     } catch (error) {
         console.log(error);
