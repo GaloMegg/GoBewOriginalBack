@@ -6,6 +6,7 @@ const payments = require('./routes/payments')
 const categoryRouter = require('./routes/categories')
 const usersRouter = require('./routes/users')
 const imageRouter = require('./routes/images')
+const faqRouter = require('./routes/faqs')
 //TODO/users instalar morgan
 require('dotenv').config();
 //Crear el servidor de express
@@ -30,8 +31,7 @@ app.use('/product', productRouter)
 app.use('/images', imageRouter)
 app.use('/categories', categoryRouter)
 app.use('/payments', payments)
-
-
+app.use('/faqs', faqRouter)
 
 app.listen(process.env.PORT, () => {
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`);

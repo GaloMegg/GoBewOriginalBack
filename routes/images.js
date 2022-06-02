@@ -1,43 +1,20 @@
 const { Router } =require('express');
+const { updateImage, createImage, deleteImage } = require('../controllers/image');
+const { validateJWT } = require('../middlewares/validateJWT');
 const Image = require('../models/Images')
 
 const router = Router();
+//PEDIR AL FRONT QUE ENVÍE HEADERS PARA POST Y DELETE!!!!
+// router.post('/new', validateJWT, createImage)
+router.post('/new',  createImage)
 
-router.post('/new', async (req, res) => {
-    const {  productId, imageName, imageAlt, imageOrder, imageIsPrimary } = req.body;
+router.put(
+    '/', 
+    validateJWT,
+    updateImage
+   )
 
-    try {
-        const newImage = new Image({productId, imageName, imageAlt, imageOrder, imageIsPrimary});
-        await newImage.save();
-        res.status(201).json({
-            err: 'ok',
-            image: newImage
-        });
-    } catch (error) {
-        res.status(501).json({
-            err: 'err',
-            msg: error
-        })
-    }
-})
-
-router.delete('/:imageId', async (req, res) => {
-    const {  imageId } = req.params;
-
-    try {
-        
-        await Image.findByIdAndDelete(imageId);
-        res.status(201).json({
-            err: 'ok',
-            
-        });
-    } catch (error) {
-        res.status(501).json({
-            err: 'err',
-            msg: error
-        })
-    }
-})
+router.delete('/:imageId', deleteImage)
 
 
 module.exports = router;
