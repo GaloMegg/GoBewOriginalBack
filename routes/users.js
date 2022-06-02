@@ -6,6 +6,7 @@ const { createUser, updateUser, loginUser, loginUserAdmin, renewToken } = requir
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
+const { sendEmail } = require('../controllers/sendEmail');
 const router = Router();
 
 router.post(

@@ -2,6 +2,7 @@ const { generateJWT } = require('../helpers/jwt');
 const Users = require('../models/Users');
 const User = require('../models/Users');
 bcrypt = require('bcryptjs');
+const nodemailer = require("nodemailer")
 
 const createUser = async (req, res) => {
     const { 
@@ -21,7 +22,43 @@ const createUser = async (req, res) => {
          newUser.userPassword = bcrypt.hashSync(userPassword, salt); 
         //  console.log(newUser.userPassword);
         await newUser.save()
-        const token = await generateJWT( newUser._id, newUser.userName ); 
+        const token = await generateJWT( newUser._id, newUser.userName );
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            post: 465,
+            secure: true,
+            auth: {
+                user: "gobeworiginal@gmail.com",
+                pass: process.env.CODE
+            }
+        })
+        mailOptions = {
+            from: "Remitente",
+            to: userEmail,
+            subject: "Confirmación de Email",
+            html: `
+            <p><span>Hola ${userFirstName},</span></p>
+            <span>Gracias por registrarte en GoBew! Estamos encantados de tenerte a bordo y trataremos de ayudarte lo máximo posible.
+            Confirme su correo electrónico ${userEmail} haciendo click en confirmar email.<br /><br /></span>
+            <a href="https://developer.mozilla.org/es/docs/Web/HTML/Element/a">Confirmar email</a>
+            <span>Háganos saber si tiene alguna pregunta, solicitud o comentarios generales simplemente respondiendo a este correo electrónico.</span>
+            <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>
+            `
+        }
+        const resMail = ""
+        await transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                resMail= {
+                    ok: false,
+                    msg: "huubo un error",
+                    err: error
+                }
+            } else {
+                resMail = {
+                    ok: true,
+                    msg: "mensaje enviado"};
+            }
+        })
         res.status(201).json({
             ok: true,
             user: {
