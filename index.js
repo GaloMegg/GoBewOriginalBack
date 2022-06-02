@@ -2,12 +2,11 @@ const express = require('express');
 const cors = require('cors')
 const { dbConnection } = require('./database/config')
 const productRouter = require('./routes/products')
+const payments = require('./routes/payments')
 const categoryRouter = require('./routes/categories')
 const usersRouter = require('./routes/users')
 const imageRouter = require('./routes/images')
 //TODO/users instalar morgan
-
-
 require('dotenv').config();
 //Crear el servidor de express
 const app = express();
@@ -30,6 +29,8 @@ app.use('/users', usersRouter);
 app.use('/product', productRouter)
 app.use('/images', imageRouter)
 app.use('/categories', categoryRouter)
+app.use('/payments', payments)
+
 
 
 app.listen(process.env.PORT, () => {
