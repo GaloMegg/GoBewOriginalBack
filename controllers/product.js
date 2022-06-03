@@ -36,7 +36,26 @@ const updateProduct = async (req, res) => {
     }
 }
 
+const updateProductActiveState = async (req, res) => {
+    const { productId, productIsActive } = req.body;
+    try {
+        
+        const product = await Product.findByIdAndUpdate(productId, {productIsActive}, { new: true })
+
+        res.status(201).json({
+            ok: true,
+            product
+        })
+    } catch (error) {
+        res.json({
+            ok:false,
+            msg: error
+        })
+    }
+}
+
 module.exports = {
     createProduct,
-    updateProduct
+    updateProduct,
+    updateProductActiveState
 }
