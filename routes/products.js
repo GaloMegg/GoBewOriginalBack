@@ -2,7 +2,7 @@ const { Router } = require("express");
 const { check } = require("express-validator");
 const mongoose = require("mongoose");
 const { idInvalid } = require("../controllers/errMsg");
-const { createProduct, updateProduct } = require("../controllers/product");
+const { createProduct, updateProduct, updateProductActiveState } = require("../controllers/product");
 const { validateFields } = require("../middlewares/validateFields");
 
 // const Images = require("../models/Images");
@@ -50,6 +50,23 @@ router.put(
     ],
     updateProduct
 );
+
+router.put(
+    '/isActive',
+    [
+        check('productId').custom(value => {
+            return Product.findById(value).then(product => {
+              if (!product) {
+                return Promise.reject(idInvalid);
+             }
+            });
+          }),
+        check('productIsActive').isBoolean(),
+        validateFields
+    ],
+    updateProductActiveState
+);
+
 router.get('/highlight', async (req, res) => {
     try {
         const productList = await Product
