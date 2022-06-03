@@ -22,13 +22,23 @@ require('dotenv').config()
 mercadopago.configure({ access_token: process.env.ACCESS_TOKEN_TEST })
 
 router.post('/pay', async (req, res) => {
-    // const { cart } = 
-    const id = 10
+    const { cart, orderTotal } = req.body
+    //! req.body= {
+    // !    userId: userResponse.userId,
+    //  !   orderTotal: totalCart,
+    //   !  orderState: 0,
+    //    ! shippingAddress: null,
+    //     !zip: null,
+    //  !   cart
+    // }
     //Cargar una orden en la base de datos y recuperar el ID 
+    const id = "1234567asdasdasd89"
+
+
 
     let preferencesPer = {
-        transaction_amount: req.body.reduce((a, b) => a + b.price * b.quantity, 0),
-        items: req.body.map(item => {
+        transaction_amount: orderTotal,
+        items: cart.map(item => {
             return {
                 title: item.productName,
                 unit_price: item.productPrice,
@@ -37,7 +47,7 @@ router.post('/pay', async (req, res) => {
         }
         ),
         // Esto debe ser el ID de la base de datos de la orden
-        external_references: `${id}`,
+        external_reference: id,
         back_urls: {
             success: `http://localhost:4000/payments/success`,
             failure: `http://localhost:4000/payments/failure`,
@@ -57,20 +67,38 @@ router.post('/pay', async (req, res) => {
 })
 
 router.get('/success', (req, res) => {
+    console.log(req.query);
     //? por query recibo el id, el status, la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos, y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
-    //*res.redirect(FRONT_URL/compra realizada)
+    // {
+    //     collection_id: '1251735767',
+    //     collection_status: 'approved',
+    // !   payment_id: '1251735767',
+    // !   status: 'approved',
+    // !   external_reference: '1234567asdasdasd89',
+    //     payment_type: 'credit_card',
+    //     merchant_order_id: '4891524835',
+    //     preference_id: '1135343864-853663a1-142c-4824-901b-51fad1f0c8c8',
+    //     site_id: 'MLA',
+    //     processing_mode: 'aggregator',
+    //     merchant_account_id: 'null'
+    //   }
+
+
+    res.redirect("http://localhost:3000/")
 
 })
 router.get('/failure', (req, res) => {
     //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
     //*res.redirect(FRONT_URL/compra fallida)
+    res.redirect("http://localhost:3000/")
 
 })
 router.get('/pending', (req, res) => {
     //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a
     //*res.redirect(FRONT_URL/compra pendiente)
+    res.redirect("http://localhost:3000/")
 })
 module.exports = router;
