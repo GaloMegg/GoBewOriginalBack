@@ -1,27 +1,40 @@
-const { generateJWT } = require('../helpers/jwt');
+bcrypt = require('bcryptjs');
+// const nodemailer = require("nodemailer")
+
 const Users = require('../models/Users');
 const User = require('../models/Users');
-bcrypt = require('bcryptjs');
+const { generateJWT, generateHash } = require('../helpers/jwt');
+const { loginActivateMail } = require('./sendEmail');
 
 const createUser = async (req, res) => {
     const { 
         userEmail, userPassword, userFirstName, userLastName,
-        userIsActive, userIsAdmin, userIsGoogle, userIsSuperAdmin
+        userIsActive, userIsAdmin, userIsGoogle, userIsSuperAdmin, userImage
      } = req.body;
     try {
+        const hash = !userIsGoogle ? await generateHash( userFirstName ) : '';
+        // const hash = await generateHash( userFirstName );
         const newUser = new User({ 
             userEmail, userPassword, userFirstName, userLastName,
-            userIsActive, userIsAdmin, userIsGoogle, userIsSuperAdmin
+            userIsActive, userIsAdmin, userIsGoogle, userIsSuperAdmin, userImage, hash
          })
+        //  console.log(newUser);
+         if(!userIsGoogle){
+            // console.log('entro')
+             const bcrypt = require('bcryptjs');
+             const salt = bcrypt.genSaltSync(10);
+             newUser.userPassword = bcrypt.hashSync(userPassword, salt);
+            //  console.log(newUser.hash);
+         } else {
+             newUser.hash = '';
+             newUser.userPassword = '';
+         }
 
-         const bcrypt = require('bcryptjs');
-         const salt = bcrypt.genSaltSync(10);
-        //  console.log(salt)
-        //  console.log(userPassword);
-         newUser.userPassword = bcrypt.hashSync(userPassword, salt); 
-        //  console.log(newUser.userPassword);
-        await newUser.save()
-        const token = await generateJWT( newUser._id, newUser.userName ); 
+         await newUser.save()
+         const token = await generateJWT( newUser._id, newUser.userName );
+         let resMail = await loginActivateMail({userEmail, userFirstName, _id:newUser._id, hash, userIsGoogle})
+         
+         
         res.status(201).json({
             ok: true,
             user: {
@@ -30,9 +43,11 @@ const createUser = async (req, res) => {
                 userLastName: newUser.userLastName,
                 userId: newUser._id,
                 token
-            }
+            },
+            resMail
         })
     } catch (error) {
+        console.log(error);
         res.json({
             ok: false,
             msg: error,
@@ -89,7 +104,8 @@ const loginUser = async (req, res) => {
         }
         
         //GENERAR JWT
-        const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
+        const token = await generateJWT( user._id, user.userFirstName );
+        // const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
         
         res.json({
             ok: true,
@@ -118,10 +134,10 @@ const loginUserAdmin = async (req, res) => {
                 msg: 'Usuario no encontrado.'
             })
         }
-        // console.log(user.userPassword, userPassword);
+        
         //Confirmar las passwords
         const validPassword = await bcrypt.compareSync(userPassword,user.userPassword); 
-        console.log(validPassword);
+        
 
         if (!validPassword) {
             return res.status(400).json({
@@ -129,9 +145,10 @@ const loginUserAdmin = async (req, res) => {
                 msg: 'Password incorrecta'
             });
         }
-        // console.log(user._id, user.userName)
+        
         //GENERAR JWT
-        const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
+        // const token = await generateJWT( user._id, user.userFirstName);
+        // const token = await generateJWT( user._id, user.userFirstName, user.userIsAdmin, user.userIsSuperAdmin );
         
         res.json({
             ok: true,
@@ -139,7 +156,7 @@ const loginUserAdmin = async (req, res) => {
             userFirstName: user.userFirstName,
             userIsSuperAdmin: user.userIsSuperAdmin,
             userIsAdmin: user.userIsAdmin,
-            token
+            // token
         })
     } catch (error) {
         console.log(error);
@@ -152,17 +169,17 @@ const loginUserAdmin = async (req, res) => {
 
 const renewToken = async (req, res = response)=>{
 
-    const { uid, name, isAdmin, isSuperAdmin } = req;
-    // console.log(uid, name, isAdmin, isSuperAdmin)
+    const { uid, name } = req;
+    // console.log("newToken",uid, name, isAdmin, isSuperAdmin)
     try {
-        const token = await generateJWT( uid, name, isAdmin, isSuperAdmin );
+        // const token = await generateJWT( uid, name, isAdmin, isSuperAdmin );
+        const token = await generateJWT( uid, name);
         res.json({
             ok: true,
             token,
             userId:uid,
             userFirstName:name,            
-            userIsSuperAdmin:isSuperAdmin,
-            userIsAdmin:isAdmin
+
         })        
     } catch (error) {
         console.log(error);
@@ -172,10 +189,35 @@ const renewToken = async (req, res = response)=>{
         })
     }
 };
+
+const updateUserActiveState = async (req, res) => {
+    const { userId, userIsActive } = req.body;
+    try {
+        const user = await User.findByIdAndUpdate(userId, {
+            userIsActive
+        }, { new: true })
+        res.status(201).json({
+            ok: true,
+            user: {
+                userFirstName: user.userFirstName,
+                userEmail: user.userEmail,
+                userLastName: user.userLastName,
+                userId: user._id,
+                userIsActive: user.userIsActive
+        }
+        })
+    } catch (error) {
+        res.json({
+            ok: false,
+            msg: error
+        })
+    }
+}
 module.exports = {
     createUser,
     updateUser,
     loginUser,
     loginUserAdmin,
-    renewToken
+    renewToken,
+    updateUserActiveState
 }

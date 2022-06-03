@@ -14,14 +14,14 @@ const validateJWT = ( req , res = response, next ) => {
 
     try { 
         //const payload = jwt.verify(
-        const { uid, name, isAdmin, isSuperAdmin } = jwt.verify(
+        const { uid, name } = jwt.verify(
             token,
             process.env.SECRET_JWT_SEED
         );
+       
         req.uid = uid;
         req.name = name;
-        req.isAdmin = isAdmin;
-        req.isSuperAdmin = isSuperAdmin;
+       
         
     } catch (error) {
         return res.status(401).json({
