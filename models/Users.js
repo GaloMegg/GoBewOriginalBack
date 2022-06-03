@@ -7,8 +7,7 @@ const UserSchema = new Schema({
         required: true
     },
     userPassword:{
-        type: String,
-        required: true
+        type: String
     },
     userIsActive:{
         type: Boolean,
@@ -37,6 +36,14 @@ const UserSchema = new Schema({
     userIsSuperAdmin:{
         type: Boolean,
         default: false
+    },
+    hash: {
+        type: String,
+        default: ""
+    },
+    userImage:{
+        type: String,
+        default: ""
     }
 })
 

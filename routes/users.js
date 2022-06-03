@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser, loginUserAdmin, renewToken } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserAdmin, renewToken, updateUserActiveState } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
@@ -16,7 +16,7 @@ router.post(
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
             return User.find({userEmail:value}).then(user => {
-              if (user.length>0) {
+              if (!user) {
                 return Promise.reject('Ya hay un usuario con ese email.');
              }
             });
@@ -39,7 +39,7 @@ router.put(
     [
         check('userId').custom(value => {
             return User.findById(value).then(user => {
-              if (user.length<1) {
+              if (!user) {
                 return Promise.reject(idInvalid);
              }
             });
@@ -49,6 +49,21 @@ router.put(
         validateFields
     ],
      updateUser
+);
+router.put(
+    '/isActive',
+    [
+        check('userId').custom(value => {
+            return User.findById(value).then(user => {
+              if (!user) {
+                return Promise.reject(idInvalid);
+             }
+            });
+          }),
+        check('userIsActive').isBoolean(),
+        validateFields
+    ],
+     updateUserActiveState
 );
 
 router.post(
@@ -70,7 +85,23 @@ router.post(
     ],
     loginUserAdmin
 )
-router.get('/adminRenew',validateJWT, renewToken);
+// router.get('/adminRenew',validateJWT, renewToken);
+router.get('/renew',validateJWT, renewToken);
+
+router.put(
+    '/activate',
+    
+    [
+        check('userId.*.hash.*.userEmail').custom(value => {
+            return User.find(value).then(user => {
+              if (!user) {
+                return Promise.reject(idInvalid);
+             }
+            });
+          })
+    ]
+    
+)
 
 router.get('/all', async (req, res) => {
     try {

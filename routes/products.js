@@ -2,7 +2,7 @@ const { Router } = require("express");
 const { check } = require("express-validator");
 const mongoose = require("mongoose");
 const { idInvalid } = require("../controllers/errMsg");
-const { createProduct, updateProduct } = require("../controllers/product");
+const { createProduct, updateProduct, updateProductActiveState } = require("../controllers/product");
 const { validateFields } = require("../middlewares/validateFields");
 
 // const Images = require("../models/Images");
@@ -37,12 +37,12 @@ router.put(
             });
           }),
         check('productName', 'El nombre del producto es obligatorio.').not().isEmpty(),
-        check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
+        // check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
         check('productPrice', 'El precio del producto es obligatorio.').not().isEmpty(),
         check('productPrice', 'El precio del producto debe ser un número.').isNumeric(),
         check('productStock', 'El stock del producto es obligatorio.').not().isEmpty(),
         check('productStock', 'El stock del producto debe ser un número.').isInt(),
-        check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
+        // check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
         // check('productIsActive', 'EL estado debe ser true o false.').isBoolean(),
         // check('productIsHighLight', 'EL estado destacado debe ser true o false.').isBoolean(),
 
@@ -50,6 +50,23 @@ router.put(
     ],
     updateProduct
 );
+
+router.put(
+    '/isActive',
+    [
+        check('productId').custom(value => {
+            return Product.findById(value).then(product => {
+              if (!product) {
+                return Promise.reject(idInvalid);
+             }
+            });
+          }),
+        check('productIsActive').isBoolean(),
+        validateFields
+    ],
+    updateProductActiveState
+);
+
 router.get('/highlight', async (req, res) => {
     try {
         const productList = await Product
