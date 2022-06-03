@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 
 const validateJWT = ( req , res = response, next ) => {
     const token = req.header('x-token');
-    console.log(token)
+    // console.log(token)
     if ( !token ) {
         return res.status(401).json({
             ok: false,
@@ -14,15 +14,14 @@ const validateJWT = ( req , res = response, next ) => {
 
     try { 
         //const payload = jwt.verify(
-        const { uid, name, isAdmin, isSuperAdmin } = jwt.verify(
+        const { uid, name } = jwt.verify(
             token,
             process.env.SECRET_JWT_SEED
         );
-        // console.log(uid, name, isAdmin, isSuperAdmin)
+       
         req.uid = uid;
         req.name = name;
-        req.isAdmin = isAdmin;
-        req.isSuperAdmin = isSuperAdmin;
+       
         
     } catch (error) {
         return res.status(401).json({
