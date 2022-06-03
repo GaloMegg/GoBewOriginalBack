@@ -37,12 +37,12 @@ router.put(
             });
         }),
         check('productName', 'El nombre del producto es obligatorio.').not().isEmpty(),
-        //check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
+        // check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
         check('productPrice', 'El precio del producto es obligatorio.').not().isEmpty(),
         check('productPrice', 'El precio del producto debe ser un número.').isNumeric(),
         check('productStock', 'El stock del producto es obligatorio.').not().isEmpty(),
         check('productStock', 'El stock del producto debe ser un número.').isInt(),
-        //check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
+        // check('productCategories', 'La categoría del producto es obligatoria.').isArray({ min: 1 }),
         // check('productIsActive', 'EL estado debe ser true o false.').isBoolean(),
         // check('productIsHighLight', 'EL estado destacado debe ser true o false.').isBoolean(),
 
