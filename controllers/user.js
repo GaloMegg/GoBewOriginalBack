@@ -12,7 +12,7 @@ const createUser = async (req, res) => {
     try {
         const newUser = new User({ 
             userEmail, userPassword, userFirstName, userLastName,
-            userIsActive, userIsAdmin, userIsGoogle, userIsSuperAdmin
+            userIsActive:false, userIsAdmin, userIsGoogle, userIsSuperAdmin
          })
 
          const bcrypt = require('bcryptjs');
@@ -209,10 +209,35 @@ const renewToken = async (req, res = response)=>{
         })
     }
 };
+
+const updateUserActiveState = async (req, res) => {
+    const { userId, userIsActive } = req.body;
+    try {
+        const user = await User.findByIdAndUpdate(userId, {
+            userIsActive
+        }, { new: true })
+        res.status(201).json({
+            ok: true,
+            user: {
+                userFirstName: user.userFirstName,
+                userEmail: user.userEmail,
+                userLastName: user.userLastName,
+                userId: user._id,
+                userIsActive: user.userIsActive
+        }
+        })
+    } catch (error) {
+        res.json({
+            ok: false,
+            msg: error
+        })
+    }
+}
 module.exports = {
     createUser,
     updateUser,
     loginUser,
     loginUserAdmin,
-    renewToken
+    renewToken,
+    updateUserActiveState
 }
