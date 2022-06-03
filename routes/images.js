@@ -10,7 +10,7 @@ router.post('/new',  createImage)
 
 router.put(
     '/', 
-    validateJWT,
+    // validateJWT,
     updateImage
    )
 
