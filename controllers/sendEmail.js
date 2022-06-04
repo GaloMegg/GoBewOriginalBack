@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer")
 const { CODE } = process.env
-const sendEmail = async (req,res,) => {
+const sendEmail1 = async (req,res,) => {
     try {
         const {userEmail, userFirstName, solicitud} = req.body
         mailOptions = ""
@@ -73,6 +73,58 @@ const sendEmail = async (req,res,) => {
         console.log(e)
     }
 }
+
+const loginActivateMail = async (obj) => {
+    if(obj.userIsGoogle) return {};
+    const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        post: 465,
+        secure: false,
+        auth: {
+            user: "gobeworiginal@gmail.com",
+            pass: process.env.CODE
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+        })
+        
+        console.log('entro a enviar mail')
+        mailOptions = {
+            from: "Remitente",
+            to: obj.userEmail,
+            subject: "Confirmación de Email",
+            html: `
+            <p><span>Hola ${obj.userFirstName},</span></p>
+            <span>Gracias por registrarte en GoBew! Estamos encantados de tenerte a bordo y trataremos de ayudarte lo máximo posible.
+            Confirme su correo electrónico ${obj.userEmail} haciendo click en confirmar email.<br /><br /></span>
+            <a href="${process.env.URL_SITE}activate/${obj._id}/${obj.hash}/${obj.userEmail}">Confirmar email</a>
+            <span>Háganos saber si tiene alguna pregunta, solicitud o comentarios generales simplemente respondiendo a este correo electrónico.</span>
+            <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>
+            `
+        }
+        // console.log(mailOptions);
+        await transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                // console.log("email no enviado")
+                // console.log(error)
+                return resMail= {
+                    ok: false,
+                    msg: "hubo un error",
+                    err: error
+                }
+            } else {
+                // console.log("email enviado")
+                return resMail = {
+                    
+                    ok: true,
+                    msg: "mensaje enviado"};
+            }
+        })
+
+}
+
 module.exports = {
-    sendEmail
+    sendEmail1,
+    loginActivateMail
 }
