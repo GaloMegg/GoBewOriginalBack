@@ -20,6 +20,24 @@ const createUserAddress = async (req, res) => {
 }
 
 
+const addressListByUserId = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const addresses = await Address.find({userId});
+        res.status(201).json({
+            ok: true,
+            addresses
+        });
+    } catch (error) {
+        res.status(501).json({
+            ok: false,
+            msg: error
+        });
+    }
+
+}
+
 module.exports = {
-    createUserAddress
+    createUserAddress,
+    addressListByUserId
 }
