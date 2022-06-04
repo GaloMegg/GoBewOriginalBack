@@ -124,15 +124,21 @@ const loginUser = async (req, res) => {
     }
 } 
 const loginUserGoogle = async (req, res) => {
-    const { userEmail } = req.body;
+    const { userEmail, userFirstName, userLastName,
+        userIsActive, userIsGoogle, userImage } = req.body;
     try {
-        const user = await Users.findOne({userEmail, userIsActive:true});
+        let user;
+        user = await Users.findOne({userEmail, userIsActive:true});
         //si no existe el user devuelve null
         if ( !user ) {
-            return res.status(400).json({
-                ok: false,
-                msg: 'Usuario no encontrado.'
-            })
+             user = new User({ 
+                userEmail, userPassword:'', userFirstName, userLastName,
+                userIsActive, userIsGoogle, userImage, hash:''
+             })
+            //  console.log(newUser);
+
+    
+             await newUser.save()
         }
         //GENERAR JWT
         const token = await generateJWT( user._id, user.userFirstName );
