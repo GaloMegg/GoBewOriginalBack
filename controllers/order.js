@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const OrderProduct = require("../models/orderProduct");
-
+const Product = require("../models/Product");
 const ObjectId = mongoose.Types.ObjectId;
 /**
 {
@@ -86,9 +86,36 @@ const getCarritoByUser = async (req, res) => {
             msg: 'El usuario no tiene un carrito de compras'
         })
     }
+
+    const products = order[0].cart.map(item =>  item.productId)
+        
+    const productsDB = await Product.find({_id: {$in: products}}).select('_id productName')
+    // console.log(productsDB)
+    const obj = {
+        orderId : order[0]._id,
+        _id : order[0]._id,
+        orderState : order[0].orderState,
+        orderTotal : order[0].orderTotal,
+        userId : order[0].userId,
+        shippingAddressId : order[0].shippingAddressId,
+        cart : order[0].cart.map(item => {
+            return {
+                _id : item._id,
+                productId : item.productId,
+                productName: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productName,
+                productCant : item.productCant,
+                productPrice : item.productPrice
+            }
+        })
+    }
+  
+
     res.status(200).json({
         ok: true,
-        order
+        obj
+        // ,
+        // order,
+        // productsDB
     })
 }
 
