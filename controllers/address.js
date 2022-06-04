@@ -2,9 +2,10 @@ const Address = require("../models/Address");
 
 const createUserAddress = async (req, res) => {
     const { userId, addressComment } = req.body;
-    
+    const addressIsShipping = true;
+    const addressIsBilling = true;
     try {
-        const newAddress = new Address({userId, addressComment});
+        const newAddress = new Address({userId, addressComment, addressIsShipping, addressIsBilling});
         await newAddress.save();
         res.status(201).json({
             ok: true,
