@@ -8,11 +8,11 @@ const addressSchema = new Schema({
     },
     addressStreet: {
         type: String,
-        required: true
+        // required: true
     },
     addressNumber: {
         type: Number,
-        required: true
+        // required: true
     },
     addressFloor: {
         type: String
@@ -22,16 +22,16 @@ const addressSchema = new Schema({
     },
     addressCity: {
         type: String,
-        required: true
+        // required: true
     },
     addressZipCode: {
         type: String,
-        required: true
+        // required: true
     },
     provinceId: {
         type: Schema.ObjectId,
         ref: 'Province',
-        required: true
+        // required: true
     },
      addressComment: {
         type: String

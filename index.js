@@ -32,6 +32,7 @@ app.use('/images', imageRouter)
 app.use('/categories', categoryRouter)
 app.use('/payments', payments)
 app.use('/faqs', faqRouter)
+app.use('/address', faqRouter)
 
 app.listen(process.env.PORT, () => {
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`);
