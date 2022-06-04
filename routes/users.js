@@ -21,13 +21,13 @@ router.post(
              }
             });
           }),
-        check('userPassword', 'La contraseña es obligatoria.').not().isEmpty(),
-        check('userPassword', 'La contraseña debe tener al menos 6 caracteres.')
-            .not()
-            .isIn(['123456', 'password1', 'god123'])
-            .withMessage('No es una constraseña segura')
-            .isLength({ min: 5 }),
-            // .matches(/\d/),
+        // check('userPassword', 'La contraseña es obligatoria.').not().isEmpty(),
+        // check('userPassword', 'La contraseña debe tener al menos 6 caracteres.')
+            // .not()
+            // .isIn(['123456', 'password1', 'god123'])
+            // .withMessage('No es una constraseña segura')
+            // .isLength({ min: 5 }),
+            // // .matches(/\d/),
         check('userFirstName', firstNameReq).not().isEmpty(),
         check('userLastName', lastNameReq).not().isEmpty(),
         validateFields
