@@ -22,6 +22,7 @@ require('dotenv').config()
 mercadopago.configure({ access_token: process.env.ACCESS_TOKEN_TEST })
 
 router.post('/pay', async (req, res) => {
+    console.log("/pay", req.body)
     const { cart, orderTotal } = req.body
     //! req.body= {
     // !    userId: userResponse.userId,
@@ -67,7 +68,6 @@ router.post('/pay', async (req, res) => {
 })
 
 router.get('/success', (req, res) => {
-    console.log(req.query);
     //? por query recibo el id, el status, la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos, y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
     // {
