@@ -13,7 +13,8 @@ const orderProductSchema = new Schema({
     },
     saleApplyId: {
         type: Schema.Types.ObjectId,
-        ref: 'SaleApply'
+        ref: 'SaleApply',
+        default:null
     },
     productCant: {
         type: Number,
