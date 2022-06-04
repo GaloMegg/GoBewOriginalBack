@@ -4,7 +4,7 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder } = require('../controllers/order');
+const { createOrder, getCarritoByUser } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 require('dotenv').config()
@@ -111,7 +111,6 @@ router.post('/order',
                 }
             });
         }),
- 
         // check("shippingAddressId", "La direccion de envio es obligatorio").not().isEmpty(),
         // check("shippingAddressId").custom(value => {
         //     return Address.findById(value).then(address => {
@@ -139,6 +138,23 @@ router.post('/order',
         validateJWT
     ],
     createOrder
+)
+
+router.get(
+    '/order/carrito/:userId',
+    [
+        check("userId", "El id del usuario es obligatorio").not().isEmpty(),
+        check('userId').custom(value => {
+            return User.findById(value).then(user => {
+                if (!user) {
+                    return Promise.reject('No hay un usuario con ese id.');
+                }
+            });
+        }),
+        validateFields,
+        validateJWT
+    ],
+    getCarritoByUser
 )
 
 module.exports = router;
