@@ -16,27 +16,33 @@ const orderSchema = new Schema({
     },
     shippingAddressId: {
         type: Schema.Types.ObjectId,
-        ref: 'Address'
+        ref: 'Address',
+        default:null
     },
     billingAddressId: {
         type: Schema.Types.ObjectId,
-        ref: 'Address'
+        ref: 'Address',
+        default:null
     },
     orderCreationDate: {
-        type: Date
+        type: Date,
+        default:null
     },
     orderAceptDate: {
-        type: Date
+        type: Date,
+        default:null
     },
     orderDeliverDate: {
-        type: Date
+        type: Date,
+        default:null
     },
     orderCancelDate: {
-        type: Date
+        type: Date,
+        default:null
     },
     orderDeliverPrice: {
         type: Number,
-        required: true
+        default:null
     }
 });
 
