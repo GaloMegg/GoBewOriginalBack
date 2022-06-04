@@ -1,8 +1,6 @@
 const { Router } =require('express');
 const { updateImage, createImage, deleteImage } = require('../controllers/image');
 const { validateJWT } = require('../middlewares/validateJWT');
-const Image = require('../models/Images')
-
 const router = Router();
 //PEDIR AL FRONT QUE ENVÍE HEADERS PARA POST Y DELETE!!!!
 // router.post('/new', validateJWT, createImage)
