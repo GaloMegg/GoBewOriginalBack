@@ -189,25 +189,21 @@ router.get('/:productId', async (req, res) => {
     const { productId } = req.params;
     try {
         const productList = await Product
-            .aggregate([
-                { $match: { _id: ObjectId(productId), productIsActive: true } },
-                {
-                    $lookup: {
-                        from: 'images',
-                        localField: '_id',
-                        foreignField: 'productId',
-                        as: 'images'
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'categories',
-                        localField: 'productCategories',
-                        foreignField: '_id',
-                        as: 'categories'
-                    }
-                }
-            ])
+        .aggregate([
+            {$match: { _id:  ObjectId(productId) }},
+            {$lookup: {
+                from: 'images',
+                localField:  '_id',
+                foreignField:'productId',
+                as: 'images'
+            }},
+            {$lookup: {
+                from: 'categories',
+                localField: 'productCategories',
+                foreignField: '_id',
+                as: 'categories'
+            }}
+        ])        
 
         res.status(200).json({
             ok: true,
