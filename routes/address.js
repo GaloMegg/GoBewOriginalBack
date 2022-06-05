@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
-const { createUserAddress, addressListByUserId } = require("../controllers/address");
+const { createUserAddress, addressListByUserId, addressGetByOrderId } = require("../controllers/address");
 const { validateFields } = require("../middlewares/validateFields");
 const { validateJWT } = require("../middlewares/validateJWT");
 const User = require("../models/Users");
@@ -27,5 +27,6 @@ router.post(
 
 
 router.get('/byUser/:userId',validateJWT, addressListByUserId)
+router.get('/byOrder/:orderId',validateJWT, addressGetByOrderId)
 
 module.exports = router;
