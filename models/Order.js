@@ -43,6 +43,14 @@ const orderSchema = new Schema({
     orderDeliverPrice: {
         type: Number,
         default:null
+    },
+    payment_id: {
+        type: String,
+        default:null
+    },
+    payment_type: {
+        type: String,
+        default:null
     }
 });
 
