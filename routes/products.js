@@ -181,7 +181,7 @@ router.get('/:productId', async (req, res) => {
     try {
         const productList = await Product
         .aggregate([
-            {$match: { _id:  ObjectId(productId), productIsActive:true }},
+            {$match: { _id:  ObjectId(productId) }},
             {$lookup: {
                 from: 'images',
                 localField:  '_id',

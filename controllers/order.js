@@ -247,7 +247,7 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
                 const opts = { session };
                 await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: orderDate, paymentId: payment_id, paymentType: payment_type}, opts);
                 const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
-                console.log(1, orderProducts)
+                // console.log(1, orderProducts)
                 await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
                 await session.commitTransaction();
                 session.endSession();
