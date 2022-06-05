@@ -189,13 +189,11 @@ const orderEntered = async (req, res) => {
 
 const orderPaid = async (req, res) => {
     const { external_reference, payment_id, payment_type } = req.query;
-    
+    console.log(external_reference, payment_id, payment_type)
+
     try {
-        await updateOrderState(external_reference, 2, payment_id, payment_type )
-        res.json({
-            ok: true,
-            orderId: external_reference
-        })
+        await updateOrderState(external_reference, 2, payment_id, payment_type)
+        res.redirect(`${process.env.URL_SITE}`)
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -241,17 +239,17 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
     // console.log(orderDate)
     switch (orderState) {
         case 1:
-            await Order.findByIdAndUpdate(orderId, {orderState: 1, orderCreationDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, { orderState: 1, orderCreationDate: orderDate });
             break;
         case 2:
             const session = await Order.startSession();
             session.startTransaction();
             try {
                 const opts = { session };
-                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: orderDate, paymentId: payment_id, paymentType: payment_type}, opts);
-                const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
+                await Order.findByIdAndUpdate(orderId, { orderState: 2, orderAceptDate: orderDate, payment_id, payment_type }, opts);
+                const orderProducts = await OrderProduct.find({ orderId: ObjectId(orderId) }, null, opts);
                 console.log(1, orderProducts)
-                await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
+                await Promise.all(orderProducts.map(item => Product.findByIdAndUpdate(item.productId, { "$inc": { productStock: -Number(item.productCant) } }, { new: true, opts })))
                 await session.commitTransaction();
                 session.endSession();
                 return {
@@ -267,10 +265,10 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
                 }
             }
         case 5:
-            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, { orderState: 5, orderRejectDate: orderDate });
             break;
         case 7:
-            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, { orderState: 7, orderPendingDate: orderDate });
             break;
         default:
             break;
@@ -283,7 +281,7 @@ const deleteOrder = async (req, res) => {
     session.startTransaction();
     try {
         const opts = { session };
-        await OrderProduct.deleteMany({orderId: ObjectId(orderId)}, opts);
+        await OrderProduct.deleteMany({ orderId: ObjectId(orderId) }, opts);
         await Order.findByIdAndDelete(orderId, opts);
         await session.commitTransaction();
         session.endSession();
