@@ -40,17 +40,17 @@ router.post(
         check('userEmail', 'El email es obligatorio.').not().isEmpty(),
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
-            return User.find({userEmail:value}).then(user => {
-              if (!user) {
-                return Promise.reject('Ya hay un usuario con ese email.');
-             }
+            return User.find({ userEmail: value }).then(user => {
+                if (!user) {
+                    return Promise.reject('Ya hay un usuario con ese email.');
+                }
             });
-          }),
+        }),
         check('userFirstName', firstNameReq).not().isEmpty(),
         check('userLastName', lastNameReq).not().isEmpty(),
         validateFields
     ],
-     createUser
+    createUser
 );
 router.put(
     '/',
@@ -94,7 +94,7 @@ router.post(
     loginUser
 )
 router.post(
-    '/authGoogle', 
+    '/authGoogle',
     [
         check('userEmail', 'El email es obligatorio').isEmail(),
         // check('userPassword', 'El password debe tener al menos 6 letras').isLength({ min: 6 }),
@@ -112,21 +112,21 @@ router.post(
     loginUserAdmin
 )
 // router.get('/adminRenew',validateJWT, renewToken);
-router.get('/renew',validateJWT, renewToken);
+router.get('/renew', validateJWT, renewToken);
 
 router.put(
     '/activate',
-    
+
     [
         check('userId.*.hash.*.userEmail').custom(value => {
             return User.find(value).then(user => {
-              if (!user) {
-                return Promise.reject(idInvalid);
-             }
+                if (!user) {
+                    return Promise.reject(idInvalid);
+                }
             });
-          })
+        })
     ]
-    
+
 )
 
 router.get('/all', async (req, res) => {

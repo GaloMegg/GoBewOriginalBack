@@ -1,13 +1,15 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
+const mongoose = require("mongoose");
 const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder, getCarritoByUser, updateCarrito, orderEntered } = require('../controllers/order');
+const { createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, orderPaidRejected, orderPaidPending } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const ObjectId = mongoose.Types.ObjectId;
 require('dotenv').config()
 // curl -X POST -H "Content-Type: application/json" "https://api.mercadopago.com/users/test_user?access_token=process.env.ACCESS_TOKEN_TEST" -d "{'site_id':'MLA'}"
 
@@ -29,14 +31,24 @@ require('dotenv').config()
 mercadopago.configure({ access_token: process.env.ACCESS_TOKEN_TEST })
 
 router.post('/pay', async (req, res) => {
-    // const { cart } = 
-    // console.log(req.body)
-    const id = 10
+    // console.log("/pay", req.body)
+    const { cart, orderId, totalCart } = req.body
+    //! req.body= {
+    // !    userId: userResponse.userId,
+    //  !   orderTotal: totalCart,
+    //   !  orderState: 0,
+    //    ! shippingAddress: null,
+    //     !zip: null,
+    //  !   cart
+    // }
     //Cargar una orden en la base de datos y recuperar el ID 
 
+
+
+
     let preferencesPer = {
-        transaction_amount: req.body.reduce((a, b) => a + b.price * b.quantity, 0),
-        items: req.body.map(item => {
+        transaction_amount: totalCart,
+        items: cart.map(item => {
             return {
                 title: item.productName,
                 unit_price: item.productPrice,
@@ -45,7 +57,7 @@ router.post('/pay', async (req, res) => {
         }
         ),
         // Esto debe ser el ID de la base de datos de la orden
-        external_references: `${id}`,
+        external_reference: orderId,
         back_urls: {
             success: `http://localhost:4000/payments/success`,
             failure: `http://localhost:4000/payments/failure`,
@@ -63,7 +75,7 @@ router.post('/pay', async (req, res) => {
         res.json({ global: response.body.id })
     })
 })
-
+    //Datos que envía mercadopago a las rutas /succes y /failure y /pending
     //     collection_id: '1251735767',
     //     collection_status: 'approved',
     // !   payment_id: '1251735767',
@@ -77,23 +89,56 @@ router.post('/pay', async (req, res) => {
     //     merchant_account_id: 'null'
     //   }
 
-router.get('/success', (req, res) => {
-    //? por query recibo el id, el status, la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos, y la merchant order ID
-    //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
-    //*res.redirect(FRONT_URL/compra realizada)
+router.get('/success',
+    [
+        check('external_reference').not().isEmpty(),
+        check('external_reference').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderPaid 
+)
 
-})
-router.get('/failure', (req, res) => {
-    //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
-    //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
-    //*res.redirect(FRONT_URL/compra fallida)
-
-})
-router.get('/pending', (req, res) => {
+//? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
+//! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
+//*res.redirect(FRONT_URL/compra fallida)
+router.get('/failure', 
+[
+    check('external_reference').not().isEmpty(),
+    check('external_reference').custom(value => {
+        return Order.findById(value).then(order => {
+            if (!order) {
+                return Promise.reject('No hay una orden con ese id.');
+            }
+        });
+    }),
+    validateFields
+],
+orderPaidRejected
+)
+router.get('/pending',
     //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a
     //*res.redirect(FRONT_URL/compra pendiente)
-})
+    [
+        check('external_reference').not().isEmpty(),
+        check('external_reference').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderPaidPending
+    )
+
 /**
 {
   userId: '629a6e92b98b31e4c460864b',
@@ -135,7 +180,7 @@ router.post('/order',
         // }),
         check("orderTotal", "El total de la orden es obligatorio").not().isEmpty(),
         check("orderTotal").isNumeric(),
-        check("cart", "Los items de la orden son obligatorios").isArray({min: 1}),
+        check("cart", "Los items de la orden son obligatorios").isArray({ min: 1 }),
         check("cart.*._id", "El id del producto es obligatorio").not().isEmpty(),
         check("cart.*._id").custom(value => {
             return Product.findById(value).then(product => {
@@ -182,7 +227,7 @@ router.put('/order/updatecarrito',
                 }
             });
         }),
-        check("cart", "Los items de la orden son obligatorios").isArray({min: 1}),
+        check("cart", "Los items de la orden son obligatorios").isArray({ min: 1 }),
         check("cart.*._id", "El id del producto es obligatorio").not().isEmpty(),
         check("cart.*._id").custom(value => {
             return Product.findById(value).then(product => {
@@ -216,4 +261,20 @@ router.get('/entered',
 ],
 orderEntered
 )
+//Solamente se pueden eliminar carritos (orderState: 0)
+router.delete('/order/:orderId',
+[
+    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+    check('orderId').custom(value => {
+        return Order.find({_id: ObjectId(value), orderState:0}).then(order => {
+            if (!order) {
+                return Promise.reject('No hay un carrito de compras con ese id.');
+            }
+        });
+    }),
+    validateFields,
+    validateJWT
+],
+deleteOrder)
+
 module.exports = router;
