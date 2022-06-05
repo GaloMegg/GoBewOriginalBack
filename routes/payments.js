@@ -89,8 +89,7 @@ router.get('/success',
                 }
             });
         }),
-        validateFields,
-        validateJWT
+        validateFields
     ],
     orderPaid 
 )
