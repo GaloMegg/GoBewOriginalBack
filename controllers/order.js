@@ -164,8 +164,38 @@ const updateCarrito = async (req, res) => {
     }   
 }
 
+const orderEntered = async (req, res) => {
+    const { orderId } = req.query;
+    try {
+        await updateOrderState(orderId, 1)
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
+const updateOrderState = async (orderId, orderState) => {
+    switch (orderState) {
+        case 1:
+            const date = new Date();
+            const orderCreationDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+            await Order.findByIdAndUpdate(orderId, {orderState: 1, orderCreationDate});
+            break;
+    
+        default:
+            break;
+    }
+}
+
 module.exports = {
     createOrder,
     getCarritoByUser,
-    updateCarrito
+    updateCarrito,
+    orderEntered
 }
