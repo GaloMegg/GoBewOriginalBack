@@ -2,7 +2,7 @@ const { Router } = require("express");
 const { check } = require("express-validator");
 const res = require("express/lib/response");
 const mongoose = require("mongoose");
-const { createFaq } = require("../controllers/faq");
+const { createFaq, updateFaq } = require("../controllers/faq");
 const { validateFields } = require("../middlewares/validateFields");
 const FAQ = require("../models/FAQ");
 
@@ -39,6 +39,24 @@ router.get('/', async (req, res) => {
         })
     }
 })
+
+router.put(
+    '/',
+    [
+        check('faqTitle').custom(value => {
+            return FAQ.find({ 'faqTitle': value }).then(faq => {
+                if(!faq) {
+                    return Promise.reject('No existe esa FAQ')
+                }
+            })
+        }),
+        check('faqTitle', 'El titulo de la FAQ es obligatorio').not().isEmpty(),
+        check('faqDescription', 'La descripcion es obligatoria').not().isEmpty(),
+        check('faqOrder', 'El orden debe ser un numero').isInt(),
+        validateFields
+    ],
+    updateFaq
+)
 
 
 module.exports = router 

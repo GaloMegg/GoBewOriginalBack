@@ -114,22 +114,6 @@ router.post(
 // router.get('/adminRenew',validateJWT, renewToken);
 router.get('/renew',validateJWT, renewToken);
 
-<<<<<<< HEAD
-// router.post(
-//     '/activate',
-
-//     [
-//         check('userId').custom(value => {
-//             return User.findById(value).then(user => {
-//               if (!user) {
-//                 return Promise.reject(idInvalid);
-//              }
-//             });
-//           })
-//     ]
-
-// )
-=======
 router.put(
     '/activate',
     
@@ -144,7 +128,6 @@ router.put(
     ]
     
 )
->>>>>>> d2a16fec39dee4528d3a7311de28f77e0333106e
 
 router.get('/all', async (req, res) => {
     try {
