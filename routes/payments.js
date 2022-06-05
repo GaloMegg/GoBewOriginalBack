@@ -29,8 +29,8 @@ require('dotenv').config()
 mercadopago.configure({ access_token: process.env.ACCESS_TOKEN_TEST })
 
 router.post('/pay', async (req, res) => {
-    console.log("/pay", req.body)
-    const { cart, orderTotal } = req.body
+    // console.log("/pay", req.body)
+    const { cart, orderId, totalCart } = req.body
     //! req.body= {
     // !    userId: userResponse.userId,
     //  !   orderTotal: totalCart,
@@ -40,12 +40,12 @@ router.post('/pay', async (req, res) => {
     //  !   cart
     // }
     //Cargar una orden en la base de datos y recuperar el ID 
-    const id = "1234567asdasdasd89"
+
 
 
 
     let preferencesPer = {
-        transaction_amount: orderTotal,
+        transaction_amount: totalCart,
         items: cart.map(item => {
             return {
                 title: item.productName,
@@ -55,7 +55,7 @@ router.post('/pay', async (req, res) => {
         }
         ),
         // Esto debe ser el ID de la base de datos de la orden
-        external_reference: id,
+        external_reference: orderId,
         back_urls: {
             success: `http://localhost:4000/payments/success`,
             failure: `http://localhost:4000/payments/failure`,
@@ -149,7 +149,7 @@ router.post('/order',
         // }),
         check("orderTotal", "El total de la orden es obligatorio").not().isEmpty(),
         check("orderTotal").isNumeric(),
-        check("cart", "Los items de la orden son obligatorios").isArray({min: 1}),
+        check("cart", "Los items de la orden son obligatorios").isArray({ min: 1 }),
         check("cart.*._id", "El id del producto es obligatorio").not().isEmpty(),
         check("cart.*._id").custom(value => {
             return Product.findById(value).then(product => {
@@ -196,7 +196,7 @@ router.put('/order/updatecarrito',
                 }
             });
         }),
-        check("cart", "Los items de la orden son obligatorios").isArray({min: 1}),
+        check("cart", "Los items de la orden son obligatorios").isArray({ min: 1 }),
         check("cart.*._id", "El id del producto es obligatorio").not().isEmpty(),
         check("cart.*._id").custom(value => {
             return Product.findById(value).then(product => {

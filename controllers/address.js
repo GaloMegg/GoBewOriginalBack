@@ -9,10 +9,10 @@ const createUserAddress = async (req, res) => {
     session.startTransaction();
     try {
         const opts = { session };
-        const newAddress = new Address({userId, addressComment, addressIsShipping, addressIsBilling}, opts);
+        const newAddress = new Address({ userId, addressComment, addressIsShipping, addressIsBilling }, opts);
         await newAddress.save();
-        await Order.findByIdAndUpdate(orderId, {shippingAddressId: newAddress._id}, opts);
-        
+        await Order.findByIdAndUpdate(orderId, { shippingAddressId: newAddress._id }, opts);
+
         await session.commitTransaction();
         session.endSession();
         res.status(201).json({
@@ -34,7 +34,7 @@ const createUserAddress = async (req, res) => {
 const addressListByUserId = async (req, res) => {
     const { userId } = req.params;
     try {
-        const addresses = await Address.find({userId});
+        const addresses = await Address.find({ userId });
         res.status(201).json({
             ok: true,
             addresses
