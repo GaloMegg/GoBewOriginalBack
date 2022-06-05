@@ -13,7 +13,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 
 router.post(
-    '/new', 
+    '/new',
     [
         check('productName', 'El nombre del producto es obligatorio.').not().isEmpty(),
         check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
@@ -27,15 +27,15 @@ router.post(
     createProduct
 );
 router.put(
-    '/', 
+    '/',
     [
         check('productId').custom(value => {
             return Product.findById(value).then(product => {
-              if (!product) {
-                return Promise.reject(idInvalid);
-             }
+                if (!product) {
+                    return Promise.reject(idInvalid);
+                }
             });
-          }),
+        }),
         check('productName', 'El nombre del producto es obligatorio.').not().isEmpty(),
         // check('productDescription', 'La descripción del producto es obligatoria.').not().isEmpty(),
         check('productPrice', 'El precio del producto es obligatorio.').not().isEmpty(),
@@ -71,26 +71,30 @@ router.get('/highlight', async (req, res) => {
     try {
         const productList = await Product
             .aggregate([
-                {$match: {productIsHighLight: true, productIsActive:true}},
-                {$lookup: {
-                    from: 'images',
-                    localField:  '_id',
-                    foreignField:'productId',
-                    as: 'images'
-                }},
-                {$lookup: {
-                    from: 'categories',
-                    localField: 'productCategories',
-                    foreignField: '_id',
-                    as: 'categories'
-                }}
+                { $match: { productIsHighLight: true, productIsActive: true } },
+                {
+                    $lookup: {
+                        from: 'images',
+                        localField: '_id',
+                        foreignField: 'productId',
+                        as: 'images'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'categories',
+                        localField: 'productCategories',
+                        foreignField: '_id',
+                        as: 'categories'
+                    }
+                }
             ])
 
         res.status(200).json({
             ok: true,
             productList
-        })                            
-            
+        })
+
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -103,28 +107,32 @@ router.get('/highlight', async (req, res) => {
 
 router.get('/name/:productName', async (req, res) => {
     let { productName } = req.params;
-    
+
     try {
         const products = await Product
-        .aggregate([
-            // {'$regex' : '^string$'}
-            {$match: { productName : { $regex: '.*' + productName + '.*', '$options' : 'i' }, productIsActive:true }},
-            {$lookup: {
-                from: 'images',
-                localField:  '_id',
-                foreignField:'productId',
-                as: 'images'
-            }},
-            {$lookup: {
-                from: 'categories',
-                localField: 'productCategories',
-                foreignField: '_id',
-                as: 'categories'
-            }}
-        ])
+            .aggregate([
+                // {'$regex' : '^string$'}
+                { $match: { productName: { $regex: '.*' + productName + '.*', '$options': 'i' }, productIsActive: true } },
+                {
+                    $lookup: {
+                        from: 'images',
+                        localField: '_id',
+                        foreignField: 'productId',
+                        as: 'images'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'categories',
+                        localField: 'productCategories',
+                        foreignField: '_id',
+                        as: 'categories'
+                    }
+                }
+            ])
         res.json(products)
     } catch (error) {
-        res.status(400).json({err: 'Ha ocurrido un error.'})
+        res.status(400).json({ err: 'Ha ocurrido un error.' })
     }
 })
 router.get('/nameAll/:productName', async (req, res) => {
@@ -155,24 +163,25 @@ router.get('/nameAll/:productName', async (req, res) => {
 })
 
 router.get('/category/:categoryId', async (req, res) => {
-    const { categoryId }= req.params;
+    const { categoryId } = req.params;
     try {
         const products = await Product
             .aggregate([
-                { $lookup:{
-                         from: "categories",
-                         pipeline: [
-                            {$match: { $or: [{_id : ObjectId(categoryId)}, { categorySupId: ObjectId(categoryId) }] }}
-                         ],
-                         as: "categories"
-                       }
-                  }
+                {
+                    $lookup: {
+                        from: "categories",
+                        pipeline: [
+                            { $match: { $or: [{ _id: ObjectId(categoryId) }, { categorySupId: ObjectId(categoryId) }] } }
+                        ],
+                        as: "categories"
+                    }
+                }
             ])
         res.json(products)
-        
+
     } catch (error) {
         console.log(error)
-        res.status(400).json({err: 'Ha ocurrido un error.'})
+        res.status(400).json({ err: 'Ha ocurrido un error.' })
     }
 })
 
@@ -196,10 +205,10 @@ router.get('/:productId', async (req, res) => {
             }}
         ])        
 
-            res.status(200).json({
-                ok: true,
-                productList
-            })
+        res.status(200).json({
+            ok: true,
+            productList
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -214,25 +223,29 @@ router.get('/', async (req, res) => {
         const productList = await Product
             .aggregate([
                 // {$match: {productIsHighLight: true, productIsActive:true}},
-                {$lookup: {
-                    from: 'images',
-                    localField:  '_id',
-                    foreignField:'productId',
-                    as: 'images'
-                }},
-                {$lookup: {
-                    from: 'categories',
-                    localField: 'productCategories',
-                    foreignField: '_id',
-                    as: 'categories'
-                }}
+                {
+                    $lookup: {
+                        from: 'images',
+                        localField: '_id',
+                        foreignField: 'productId',
+                        as: 'images'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'categories',
+                        localField: 'productCategories',
+                        foreignField: '_id',
+                        as: 'categories'
+                    }
+                }
             ])
-                                    // .find()
-                                    // .populate({path:'productCategories', select: '_id categoryName categoryIsActive', populate: { path: 'categorySupId', select: '_id categoryName categoryIsActive' }})
-            res.status(200).json({
-                ok: true,
-                productList
-            })
+        // .find()
+        // .populate({path:'productCategories', select: '_id categoryName categoryIsActive', populate: { path: 'categorySupId', select: '_id categoryName categoryIsActive' }})
+        res.status(200).json({
+            ok: true,
+            productList
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -245,4 +258,4 @@ router.get('/', async (req, res) => {
 
 
 
-module.exports= router;
+module.exports = router;

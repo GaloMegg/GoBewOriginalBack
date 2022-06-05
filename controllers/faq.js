@@ -1,3 +1,4 @@
+const FAQ = require('../models/FAQ');
 const Faq = require('../models/FAQ');
 
 const createFaq = async (req, res) => {
@@ -19,8 +20,31 @@ const createFaq = async (req, res) => {
     }
 }
 
+const updateFaq = async (req, res) => {
+    const { faqTitle, faqDescription, faqOrder, faqId } = req.body;
 
+    try {
+        const faqToUpdate = { faqTitle, faqDescription, faqOrder }
+        const faq = await FAQ.findByIdAndUpdate(faqId, faqToUpdate, { new: true })
+
+        res.status(201).json({
+            ok: true,
+            faq: {
+                faqTitle : faq.faqTitle,
+                faqDescription: faq.faqDescription,
+                faqOrder: faq.faqOrder,
+                faqId: faq.faqId
+            }
+        })
+    } catch (error) {
+        res.json({
+            ok: false,
+            msg: error
+        })
+    }
+}
 
 module.exports = {
-    createFaq
+    createFaq,
+    updateFaq
 }

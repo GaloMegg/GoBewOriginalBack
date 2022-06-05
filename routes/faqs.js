@@ -2,7 +2,8 @@ const { Router } = require("express");
 const { check } = require("express-validator");
 const res = require("express/lib/response");
 const mongoose = require("mongoose");
-const { createFaq } = require("../controllers/faq");
+const { idInvalid } = require("../controllers/errMsg");
+const { createFaq, updateFaq } = require("../controllers/faq");
 const { validateFields } = require("../middlewares/validateFields");
 const FAQ = require("../models/FAQ");
 
@@ -25,7 +26,7 @@ router.post(
 
 router.get('/', async (req, res) => {
     try {
-        const faqList = await FAQ.find()
+        const faqList = await FAQ.find().sort({faqOrder: 1 })
         
         res.status(200).json({
             ok: true,
@@ -39,6 +40,24 @@ router.get('/', async (req, res) => {
         })
     }
 })
+
+router.put(
+    '/',
+    [
+        check('faqId').custom(value => {
+            return FAQ.findById(value).then(faq => {
+                if(!faq) {
+                    return Promise.reject(idInvalid)
+                }
+            })
+        }),
+        check('faqTitle', 'El titulo de la FAQ es obligatorio').not().isEmpty(),
+        check('faqDescription', 'La descripcion es obligatoria').not().isEmpty(),
+        check('faqOrder', 'El orden debe ser un numero').isInt(),
+        validateFields
+    ],
+    updateFaq
+)
 
 
 module.exports = router 
