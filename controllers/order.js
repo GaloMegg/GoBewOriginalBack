@@ -3,27 +3,7 @@ const Order = require("../models/Order");
 const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
 const ObjectId = mongoose.Types.ObjectId;
-/**
-{
-  userId: '629a6e92b98b31e4c460864b',
-  orderTotal: 186471,
-  shippingAddressId: '',
-  cart: [
-    {
-      _id: '6290d8e06655f25f6df9a9f8',
-      quantity: 2,
-      productPrice: 20001,
-      productName: 'Celular ZTEA'
-    },
-    {
-      _id: '6290d9a66655f25f6df9a9fc',
-      quantity: 1,
-      productPrice: 146469,
-      productName: 'Celular Xiaomi Redmi Note 10 PRO 8GB + 128 GB Onyx Grey'
-    }
-  ]
-}
- */
+
 const createOrder = async (req, res) => {
     const { userId, orderTotal } = req.body;
 
@@ -118,8 +98,74 @@ const getCarritoByUser = async (req, res) => {
         // productsDB
     })
 }
+/**
+{
+  userId: '629a6e92b98b31e4c460864b',
+  orderTotal: 186471,
+  shippingAddressId: '',
+  cart: [
+    {
+      _id: '6290d8e06655f25f6df9a9f8',
+      quantity: 2,
+      productPrice: 20001,
+      productName: 'Celular ZTEA'
+    },
+    {
+      _id: '6290d9a66655f25f6df9a9fc',
+      quantity: 1,
+      productPrice: 146469,
+      productName: 'Celular Xiaomi Redmi Note 10 PRO 8GB + 128 GB Onyx Grey'
+    }
+  ]
+}
+ */
+const updateCarrito = async (req, res) => {
+    const { orderId, orderTotal } = req.body;
+    // console.log(orderId, orderTotal)    
+    const session = await Order.startSession();
+    session.startTransaction();
+    try {
+        const opts = { session };
+        // console.log(1)
+        await OrderProduct.deleteMany({orderId: ObjectId(orderId)}, opts);
+        // console.log(2)
+        const order = await Order.findByIdAndUpdate(orderId, {orderTotal}, opts);            
+        // console.log(3)
+        // console.log(order)       
+        
+        const orderProduct = req.body.cart.map(item => {
+            return {
+                orderId,
+                productId: item._id,
+                productCant: item.quantity,
+                productPrice: item.productPrice
+            }
+        })
+        
+        const cart = await OrderProduct.insertMany(orderProduct, opts);
+        
+        await session.commitTransaction();
+        session.endSession();
+        res.status(201).json({
+            ok: true,
+            orderId,
+            userId: order.userId,
+            orderTotal,
+            shippingAddressId: '',
+            cart
+        });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(501).json({
+            ok: false,
+            msg: error
+        });
+    }   
+}
 
 module.exports = {
     createOrder,
-    getCarritoByUser
+    getCarritoByUser,
+    updateCarrito
 }
