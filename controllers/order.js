@@ -166,9 +166,148 @@ const updateCarrito = async (req, res) => {
         });
     }
 }
+//Estado 1 => COMPRA INGRESADA
+//TODO: Enviar correo de compra ingresada (en proceso?)
+
+const orderEntered = async (req, res) => {
+    const { orderId } = req.query;
+    try {
+        await updateOrderState(orderId, 1)
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+//Estado 2 => PAGO ACEPTADO
+//TODO: Enviar correo de confirmacion de pago
+
+const orderPaid = async (req, res) => {
+    const { external_reference, payment_id, payment_type } = req.query;
+    
+    try {
+        await updateOrderState(external_reference, 2, payment_id, payment_type )
+        res.json({
+            ok: true,
+            orderId: external_reference
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
+const orderPaidRejected = async (req, res) => {
+    const { external_reference } = req.query;
+    try {
+        await updateOrderState(external_reference, 5)
+        res.json({
+            ok: true,
+            orderId: external_reference
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+const orderPaidPending = async (req, res) => {
+    const { external_reference } = req.query;
+    try {
+        await updateOrderState(external_reference, 7)
+        res.json({
+            ok: true,
+            orderId: external_reference
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
+const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
+    const date = new Date();
+    const orderDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+    // console.log(orderDate)
+    switch (orderState) {
+        case 1:
+            await Order.findByIdAndUpdate(orderId, {orderState: 1, orderCreationDate: orderDate});
+            break;
+        case 2:
+            const session = await Order.startSession();
+            session.startTransaction();
+            try {
+                const opts = { session };
+                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: orderDate, paymentId: payment_id, paymentType: payment_type}, opts);
+                const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
+                console.log(1, orderProducts)
+                await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
+                await session.commitTransaction();
+                session.endSession();
+                return {
+                    ok: true
+                }
+            } catch (error) {
+                await session.abortTransaction();
+                session.endSession();
+                // console.log(error)
+                return {
+                    ok: false,
+                    msg: error
+                }
+            }
+        case 5:
+            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: orderDate});
+            break;
+        case 7:
+            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: orderDate});
+            break;
+        default:
+            break;
+    }
+}
+
+const deleteOrder = async (req, res) => {
+    const { orderId } = req.params;
+    const session = await Order.startSession();
+    session.startTransaction();
+    try {
+        const opts = { session };
+        await OrderProduct.deleteMany({orderId: ObjectId(orderId)}, opts);
+        await Order.findByIdAndDelete(orderId, opts);
+        await session.commitTransaction();
+        session.endSession();
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
 
 module.exports = {
     createOrder,
     getCarritoByUser,
-    updateCarrito
+    updateCarrito,
+    orderEntered,
+    orderPaid,
+    orderPaidRejected,
+    deleteOrder,
+    orderPaidPending
 }

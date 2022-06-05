@@ -47,8 +47,26 @@ const addressListByUserId = async (req, res) => {
     }
 
 }
+const addressGetByOrderId = async (req, res) => {
+    const { orderId } = req.params;
+    try {
+        const order = await Order.findById(orderId);
+        const address = await Address.findById(order.shippingAddressId);
 
+        res.status(201).json({
+            ok: true,
+            orderId,
+            address
+        });
+    } catch (error) {
+        res.status(501).json({
+            ok: false,
+            msg: error
+        });
+    }
+}
 module.exports = {
     createUserAddress,
-    addressListByUserId
+    addressListByUserId,
+    addressGetByOrderId
 }

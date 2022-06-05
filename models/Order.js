@@ -40,8 +40,24 @@ const orderSchema = new Schema({
         type: Date,
         default:null
     },
+    orderRejectDate: {
+        type: Date,
+        default:null
+    },
+    orderPendingDate: {
+        type: Date,
+        default:null
+    },
     orderDeliverPrice: {
         type: Number,
+        default:null
+    },
+    payment_id: {
+        type: String,
+        default:null
+    },
+    payment_type: {
+        type: String,
         default:null
     }
 });
