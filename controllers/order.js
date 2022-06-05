@@ -216,6 +216,21 @@ const orderPaidRejected = async (req, res) => {
         })
     }
 }
+const orderPaidPending = async (req, res) => {
+    const { external_reference } = req.query;
+    try {
+        await updateOrderState(external_reference, 7)
+        res.json({
+            ok: true,
+            orderId: external_reference
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
 
 const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
     const date = new Date();
@@ -250,6 +265,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             }
         case 5:
             await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: orderDate});
+            break;
+        case 7:
+            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: orderDate});
             break;
         default:
             break;
@@ -287,5 +305,6 @@ module.exports = {
     orderEntered,
     orderPaid,
     orderPaidRejected,
-    deleteOrder
+    deleteOrder,
+    orderPaidPending
 }
