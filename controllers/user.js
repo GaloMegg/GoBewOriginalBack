@@ -123,6 +123,39 @@ const loginUser = async (req, res) => {
         })
     }
 } 
+const loginUserGoogle = async (req, res) => {
+    const { userEmail, userFirstName, userLastName,
+        userIsActive, userIsGoogle, userImage } = req.body;
+    try {
+        let user;
+        user = await Users.findOne({userEmail, userIsActive:true});
+        //si no existe el user devuelve null
+        if ( !user ) {
+             user = new User({ 
+                userEmail, userPassword:'', userFirstName, userLastName,
+                userIsActive, userIsGoogle, userImage, hash:''
+             })
+            //  console.log(newUser);
+
+    
+             await user.save()
+        }
+        //GENERAR JWT
+        const token = await generateJWT( user._id, user.userFirstName );
+        res.json({
+            ok: true,
+            userId: user._id,
+            userFirstName: user.userFirstName,
+            token
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Usuario no encontrado'
+        })
+    }
+} 
 const loginUserAdmin = async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
@@ -217,6 +250,7 @@ module.exports = {
     createUser,
     updateUser,
     loginUser,
+    loginUserGoogle,
     loginUserAdmin,
     renewToken,
     updateUserActiveState
