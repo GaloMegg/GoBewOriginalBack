@@ -14,4 +14,11 @@ const faqSchema = new Schema({
     }
 });
 
+faqSchema.method('toJSON', function(){
+    
+    const { __v, _id, ...object } = this.toObject();
+    object.faqId = _id;
+    return object;
+});
+
 module.exports = model('FAQ', faqSchema);
