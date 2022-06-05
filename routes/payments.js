@@ -4,7 +4,7 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder, getCarritoByUser, updateCarrito, orderEntered } = require('../controllers/order');
+const { createOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -63,7 +63,7 @@ router.post('/pay', async (req, res) => {
         res.json({ global: response.body.id })
     })
 })
-
+    //Datos que envía mercadopago a las rutas /succes y /failure y /pending
     //     collection_id: '1251735767',
     //     collection_status: 'approved',
     // !   payment_id: '1251735767',
@@ -77,12 +77,22 @@ router.post('/pay', async (req, res) => {
     //     merchant_account_id: 'null'
     //   }
 
-router.get('/success', (req, res) => {
-    //? por query recibo el id, el status, la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos, y la merchant order ID
-    //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
-    //*res.redirect(FRONT_URL/compra realizada)
+router.get('/success',
+    [
+        check('external_reference').not().isEmpty(),
+        check('external_reference').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields,
+        validateJWT
+    ],
+    orderPaid 
+)
 
-})
 router.get('/failure', (req, res) => {
     //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
