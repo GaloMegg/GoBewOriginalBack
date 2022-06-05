@@ -138,7 +138,7 @@ const loginUserGoogle = async (req, res) => {
             //  console.log(newUser);
 
     
-             await newUser.save()
+             await user.save()
         }
         //GENERAR JWT
         const token = await generateJWT( user._id, user.userFirstName );

@@ -4,9 +4,10 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder, getCarritoByUser } = require('../controllers/order');
+const { createOrder, getCarritoByUser, updateCarrito } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 require('dotenv').config()
 // curl -X POST -H "Content-Type: application/json" "https://api.mercadopago.com/users/test_user?access_token=process.env.ACCESS_TOKEN_TEST" -d "{'site_id':'MLA'}"
 
@@ -184,4 +185,33 @@ router.get(
     getCarritoByUser
 )
 
+
+router.put('/order/updatecarrito',
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        check("cart", "Los items de la orden son obligatorios").isArray({min: 1}),
+        check("cart.*._id", "El id del producto es obligatorio").not().isEmpty(),
+        check("cart.*._id").custom(value => {
+            return Product.findById(value).then(product => {
+                if (!product) {
+                    return Promise.reject('No hay un producto con ese id.');
+                }
+            });
+        }),
+        check("cart.*.productPrice", "El precio del producto es obligatorio").not().isEmpty(),
+        check("cart.*.productPrice").isNumeric(),
+        check("cart.*.quantity", "La cantidad del producto es obligatorio").not().isEmpty(),
+        check("cart.*.quantity").isNumeric(),
+        validateFields,
+        validateJWT
+    ],
+    updateCarrito
+)
 module.exports = router;
