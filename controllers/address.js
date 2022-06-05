@@ -1,17 +1,28 @@
 const Address = require("../models/Address");
+const Order = require("../models/Order");
 
 const createUserAddress = async (req, res) => {
-    const { userId, addressComment } = req.body;
+    const { userId, addressComment, orderId } = req.body;
     const addressIsShipping = true;
     const addressIsBilling = true;
+    const session = await Order.startSession();
+    session.startTransaction();
     try {
-        const newAddress = new Address({userId, addressComment, addressIsShipping, addressIsBilling});
+        const opts = { session };
+        const newAddress = new Address({userId, addressComment, addressIsShipping, addressIsBilling}, opts);
         await newAddress.save();
+        await Order.findByIdAndUpdate(orderId, {shippingAddressId: newAddress._id}, opts);
+        
+        await session.commitTransaction();
+        session.endSession();
         res.status(201).json({
             ok: true,
-            newAddress
+            newAddress,
+            orderId
         });
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         res.status(501).json({
             ok: false,
             msg: error
