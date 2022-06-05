@@ -201,6 +201,22 @@ const orderPaid = async (req, res) => {
     }
 }
 
+const orderPaidRejected = async (req, res) => {
+    const { external_reference } = req.query;
+    try {
+        await updateOrderState(external_reference, 5)
+        res.json({
+            ok: true,
+            orderId: external_reference
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
     const date = new Date();
     const orderDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
@@ -220,7 +236,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
                 await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
                 await session.commitTransaction();
                 session.endSession();
-            
+                return {
+                    ok: true
+                }
             } catch (error) {
                 await session.abortTransaction();
                 session.endSession();
@@ -230,6 +248,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
                     msg: error
                 }
             }
+        case 5:
+            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: orderDate});
+            break;
         default:
             break;
     }
@@ -265,5 +286,6 @@ module.exports = {
     updateCarrito,
     orderEntered,
     orderPaid,
+    orderPaidRejected,
     deleteOrder
 }

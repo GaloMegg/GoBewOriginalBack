@@ -40,6 +40,10 @@ const orderSchema = new Schema({
         type: Date,
         default:null
     },
+    orderRejectDate: {
+        type: Date,
+        default:null
+    },
     orderDeliverPrice: {
         type: Number,
         default:null
