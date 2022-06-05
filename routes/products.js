@@ -135,6 +135,32 @@ router.get('/name/:productName', async (req, res) => {
         res.status(400).json({ err: 'Ha ocurrido un error.' })
     }
 })
+router.get('/nameAll/:productName', async (req, res) => {
+    let { productName } = req.params;
+    
+    try {
+        const products = await Product
+        .aggregate([
+            // {'$regex' : '^string$'}
+            {$match: { productName : { $regex: '.*' + productName + '.*', '$options' : 'i' } }},
+            {$lookup: {
+                from: 'images',
+                localField:  '_id',
+                foreignField:'productId',
+                as: 'images'
+            }},
+            {$lookup: {
+                from: 'categories',
+                localField: 'productCategories',
+                foreignField: '_id',
+                as: 'categories'
+            }}
+        ])
+        res.json(products)
+    } catch (error) {
+        res.status(400).json({err: 'Ha ocurrido un error.'})
+    }
+})
 
 router.get('/category/:categoryId', async (req, res) => {
     const { categoryId } = req.params;
