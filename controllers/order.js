@@ -183,7 +183,9 @@ const orderEntered = async (req, res) => {
 const updateOrderState = async (orderId, orderState) => {
     switch (orderState) {
         case 1:
-            await Order.findByIdAndUpdate(orderId, {orderState: 1});
+            const date = new Date();
+            const orderCreationDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+            await Order.findByIdAndUpdate(orderId, {orderState: 1, orderCreationDate});
             break;
     
         default:
