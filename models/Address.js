@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const addressSchema = new Schema({
     userId: {
@@ -33,7 +33,7 @@ const addressSchema = new Schema({
         ref: 'Province',
         // required: true
     },
-     addressComment: {
+    addressComment: {
         type: String
     },
     addressIsShipping: {

@@ -5,14 +5,15 @@ const Product = require("../models/Product");
 const ObjectId = mongoose.Types.ObjectId;
 
 const createOrder = async (req, res) => {
+    console.log(req.body);
     const { userId, orderTotal } = req.body;
 
     const session = await Order.startSession();
     session.startTransaction();
     try {
-        
+
         const opts = { session };
-        const newOrder = new Order({userId, orderTotal, orderState:0 });
+        const newOrder = new Order({ userId, orderTotal, orderState: 0 });
         await newOrder.save(opts);
 
         const orderId = newOrder._id;
@@ -24,9 +25,9 @@ const createOrder = async (req, res) => {
                 productPrice: item.productPrice
             }
         })
-        
+
         const cart = await OrderProduct.insertMany(orderProduct, opts);
-        
+
         await session.commitTransaction();
         session.endSession();
         res.status(201).json({
@@ -51,44 +52,46 @@ const createOrder = async (req, res) => {
 const getCarritoByUser = async (req, res) => {
     const { userId } = req.params;
     const order = await Order
-    .aggregate([
-        {$match: {userId: ObjectId(userId),orderState:0}},
-        {$lookup: {
-            from: 'orderproducts',
-            localField:  '_id',
-            foreignField:'orderId',
-            as: 'cart'            
-        }}
-    ])
-    if(!order){
+        .aggregate([
+            { $match: { userId: ObjectId(userId), orderState: 0 } },
+            {
+                $lookup: {
+                    from: 'orderproducts',
+                    localField: '_id',
+                    foreignField: 'orderId',
+                    as: 'cart'
+                }
+            }
+        ])
+    if (!order) {
         return res.status(404).json({
             ok: false,
             msg: 'El usuario no tiene un carrito de compras'
         })
     }
 
-    const products = order[0].cart.map(item =>  item.productId)
-        
-    const productsDB = await Product.find({_id: {$in: products}}).select('_id productName')
+    const products = order[0]?.cart.map(item => item.productId)
+
+    const productsDB = await Product.find({ _id: { $in: products } }).select('_id productName')
     // console.log(productsDB)
     const obj = {
-        orderId : order[0]._id,
-        _id : order[0]._id,
-        orderState : order[0].orderState,
-        orderTotal : order[0].orderTotal,
-        userId : order[0].userId,
-        shippingAddressId : order[0].shippingAddressId,
-        cart : order[0].cart.map(item => {
+        orderId: order[0]?._id,
+        _id: order[0]?._id,
+        orderState: order[0]?.orderState,
+        orderTotal: order[0]?.orderTotal,
+        userId: order[0]?.userId,
+        shippingAddressId: order[0]?.shippingAddressId,
+        cart: order[0]?.cart.map(item => {
             return {
-                _id : item._id,
-                productId : item.productId,
-                productName: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productName,
-                productCant : item.productCant,
-                productPrice : item.productPrice
+                _id: item._id,
+                productId: item.productId,
+                productName: productsDB?.filter(product => product._id.toString() === item.productId.toString())[0].productName,
+                productCant: item.productCant,
+                productPrice: item.productPrice
             }
         })
     }
-  
+
 
     res.status(200).json({
         ok: true,
@@ -127,12 +130,12 @@ const updateCarrito = async (req, res) => {
     try {
         const opts = { session };
         // console.log(1)
-        await OrderProduct.deleteMany({orderId: ObjectId(orderId)}, opts);
+        await OrderProduct.deleteMany({ orderId: ObjectId(orderId) }, opts);
         // console.log(2)
-        const order = await Order.findByIdAndUpdate(orderId, {orderTotal}, opts);            
+        const order = await Order.findByIdAndUpdate(orderId, { orderTotal }, opts);
         // console.log(3)
         // console.log(order)       
-        
+
         const orderProduct = req.body.cart.map(item => {
             return {
                 orderId,
@@ -141,9 +144,9 @@ const updateCarrito = async (req, res) => {
                 productPrice: item.productPrice
             }
         })
-        
+
         const cart = await OrderProduct.insertMany(orderProduct, opts);
-        
+
         await session.commitTransaction();
         session.endSession();
         res.status(201).json({
@@ -161,7 +164,7 @@ const updateCarrito = async (req, res) => {
             ok: false,
             msg: error
         });
-    }   
+    }
 }
 //Estado 1 => COMPRA INGRESADA
 //TODO: Enviar correo de compra ingresada (en proceso?)
