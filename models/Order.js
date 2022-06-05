@@ -44,6 +44,10 @@ const orderSchema = new Schema({
         type: Date,
         default:null
     },
+    orderPendingDate: {
+        type: Date,
+        default:null
+    },
     orderDeliverPrice: {
         type: Number,
         default:null

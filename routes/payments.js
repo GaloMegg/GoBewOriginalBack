@@ -5,7 +5,7 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, orderPaidRejected } = require('../controllers/order');
+const { createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, orderPaidRejected, orderPaidPending } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -111,11 +111,24 @@ router.get('/failure',
 ],
 orderPaidRejected
 )
-router.get('/pending', (req, res) => {
+router.get('/pending',
     //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
     //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a
     //*res.redirect(FRONT_URL/compra pendiente)
-})
+    [
+        check('external_reference').not().isEmpty(),
+        check('external_reference').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderPaidPending
+    )
+
 /**
 {
   userId: '629a6e92b98b31e4c460864b',
