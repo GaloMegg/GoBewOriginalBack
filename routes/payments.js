@@ -1,13 +1,15 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
+const mongoose = require("mongoose");
 const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid } = require('../controllers/order');
+const { createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const ObjectId = mongoose.Types.ObjectId;
 require('dotenv').config()
 // curl -X POST -H "Content-Type: application/json" "https://api.mercadopago.com/users/test_user?access_token=process.env.ACCESS_TOKEN_TEST" -d "{'site_id':'MLA'}"
 
@@ -226,4 +228,20 @@ router.get('/entered',
 ],
 orderEntered
 )
+//Solamente se pueden eliminar carritos (orderState: 0)
+router.delete('/order/:orderId',
+[
+    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+    check('orderId').custom(value => {
+        return Order.find({_id: ObjectId(value), orderState:0}).then(order => {
+            if (!order) {
+                return Promise.reject('No hay un carrito de compras con ese id.');
+            }
+        });
+    }),
+    validateFields,
+    validateJWT
+],
+deleteOrder)
+
 module.exports = router;

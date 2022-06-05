@@ -235,10 +235,35 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
     }
 }
 
+const deleteOrder = async (req, res) => {
+    const { orderId } = req.params;
+    const session = await Order.startSession();
+    session.startTransaction();
+    try {
+        const opts = { session };
+        await OrderProduct.deleteMany({orderId: ObjectId(orderId)}, opts);
+        await Order.findByIdAndDelete(orderId, opts);
+        await session.commitTransaction();
+        session.endSession();
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 module.exports = {
     createOrder,
     getCarritoByUser,
     updateCarrito,
     orderEntered,
-    orderPaid
+    orderPaid,
+    deleteOrder
 }
