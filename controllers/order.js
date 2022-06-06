@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
+const Image = require("../models/Images");
 const ObjectId = mongoose.Types.ObjectId;
 
 const createOrder = async (req, res) => {
@@ -69,10 +70,12 @@ const getCarritoByUser = async (req, res) => {
         })
     }
 
-    const products = order[0]?.cart.map(item => item.productId)
+    const products = order[0]?.cart?.map(item => item.productId)
+    if (!products) return res.status(404).json({ ok: false, msg: 'El usuario no tiene un carrito de compras' })
 
-    const productsDB = await Product.find({ _id: { $in: products } }).select('_id productName')
-    // console.log(productsDB)
+    const productsDB = await Product.find({ _id: { $in: products } }).select('_id productName productStock')
+    const productsImage = await Image.find({ productId: { $in: products } }).select('_id productId imageName imageAlt imageIsPrimary imageOrder')
+    console.log(productsImage)
     const obj = {
         orderId: order[0]?._id,
         _id: order[0]?._id,
@@ -85,8 +88,11 @@ const getCarritoByUser = async (req, res) => {
                 _id: item._id,
                 productId: item.productId,
                 productName: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productName,
+                productStock: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productStock,
                 productCant: item.productCant,
-                productPrice: item.productPrice
+                productPrice: item.productPrice,
+                images: productsImage?.filter(image => image?.productId?.toString() === item.productId.toString())[0]
+
             }
         })
     }
