@@ -104,7 +104,6 @@ const getCarritoByUser = async (req, res) => {
                 productPrice: item.productPrice,
                 images: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].images,
                 // images: productsImage?.filter(image => image?.productId?.toString() === item.productId.toString())[0]
-
             }
         })
     }
