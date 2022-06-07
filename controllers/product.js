@@ -18,10 +18,11 @@ const createProduct = async (req, res) => {
     }
 }
 const updateProduct = async (req, res) => {
+    // console.log('entro a updateProduct')
     const { productId, productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories } = req.body;
     try {
-    
         const productToUpdate={productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories}    
+        // console.log(productToUpdate)
         const product = await Product.findByIdAndUpdate(productId, productToUpdate, { new: true })
 
         res.status(201).json({
