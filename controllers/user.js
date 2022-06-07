@@ -4,7 +4,9 @@ bcrypt = require('bcryptjs');
 const Users = require('../models/Users');
 const User = require('../models/Users');
 const { generateJWT, generateHash } = require('../helpers/jwt');
-const { loginActivateMail } = require('./sendEmail');
+// const { loginActivateMail } = require('./sendEmail');
+const { htmlNewEmail, subjectNewEmail } = require('./mailMsg');
+const { emailSender } = require('./sendEmail');
 
 const createUser = async (req, res) => {
     const { 
@@ -32,8 +34,15 @@ const createUser = async (req, res) => {
 
          await newUser.save()
          const token = await generateJWT( newUser._id, newUser.userName );
-         let resMail = await loginActivateMail({userEmail, userFirstName, _id:newUser._id, hash, userIsGoogle})
-         
+        //  let resMail = await loginActivateMail({userEmail, userFirstName, _id:newUser._id, hash, userIsGoogle})
+        let resMail = {};
+        if(!userIsGoogle){
+            const link = !!userIsAdmin 
+                ? `${process.env.URL_SITE_ADMIN}activate/${newUser._id}/${hash}/${userEmail}`
+                : `${process.env.URL_SITE_FRONT}activate/${newUser._id}/${hash}/${userEmail}`
+            const html = htmlNewEmail({userEmail, userFirstName,  link})
+            resMail = await emailSender(subjectNewEmail, html, userEmail)
+        }
          
         res.status(201).json({
             ok: true,

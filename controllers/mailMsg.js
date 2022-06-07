@@ -7,11 +7,11 @@ const subjectNewAccount = 'Bienvenido a GoBew!'
 const subjectNewPassword = 'Cambio de contraseña en GoBew'
 const subjectNewEmail = 'Confirmación de Email'
 
-const htmlNewEmail =(obj) =>{ 
-    const html= `<p><span>Hola ${obj.userFirstName},</span></p>
+const htmlNewEmail =({userEmail, userFirstName,  link}) =>{ 
+    const html= `<p><span>Hola ${userFirstName},</span></p>
     <span>Gracias por registrarte en GoBew! Estamos encantados de tenerte a bordo y trataremos de ayudarte lo máximo posible.
-    Confirme su correo electrónico ${obj.userEmail} haciendo click en confirmar email.<br /><br /></span>
-    <a href="${process.env.URL_SITE}activate/${obj._id}/${obj.hash}/${obj.userEmail}">Confirmar email</a>
+    Confirme su correo electrónico ${userEmail} haciendo click en confirmar email.<br /><br /></span>
+    <a href="${link}">Confirmar email</a>
     <span>Háganos saber si tiene alguna pregunta, solicitud o comentarios generales simplemente respondiendo a este correo electrónico.</span>
     <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>`
 
