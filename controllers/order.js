@@ -118,9 +118,9 @@ const getCarritoByUser = async (req, res) => {
         // productsDB
     })
 }
-//Carrito es una orden con estado 0
+//trae la orden por id
 const getCarritoByOrder = async (orderId) => {
-    // console.log(orderId)
+    console.log(orderId)
     const order = await Order
     .aggregate([
         {$match: {_id: ObjectId(orderId)}},
@@ -284,6 +284,7 @@ const orderPaid = async (req, res) => {
         })
     }
 }
+//TODO: enviar correo de rechazo de pago
 
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
@@ -300,6 +301,8 @@ const orderPaidRejected = async (req, res) => {
         })
     }
 }
+//TODO: enviar correo de orden pendiende de pago de pago
+
 const orderPaidPending = async (req, res) => {
     const { external_reference } = req.query;
     try {
@@ -315,6 +318,7 @@ const orderPaidPending = async (req, res) => {
         })
     }
 }
+//TODO: fciones para cambiar estado cancelado, enviado, entregado (todas con su email)
 
 const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
     const date = new Date();
@@ -382,6 +386,19 @@ const deleteOrder = async (req, res) => {
     }
 }
 
+const getOrderById = async (req, res) => {
+    const orderId = req.params.orderId;
+    try {
+        const order = await getCarritoByOrder(orderId)
+        console.log(order)
+        res.json(order)
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
 module.exports = {
     createOrder,
     getCarritoByUser,
@@ -390,5 +407,6 @@ module.exports = {
     orderPaid,
     orderPaidRejected,
     deleteOrder,
-    orderPaidPending
+    orderPaidPending,
+    getOrderById
 }
