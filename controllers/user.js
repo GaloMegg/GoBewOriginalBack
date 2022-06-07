@@ -85,7 +85,7 @@ const updateUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
-        const user = await Users.findOne({userEmail, userIsActive:true});
+        const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true});
         //si no existe el user devuelve null
         if ( !user ) {
             return res.status(400).json({
@@ -128,7 +128,7 @@ const loginUserGoogle = async (req, res) => {
         userIsActive, userIsGoogle, userImage } = req.body;
     try {
         let user;
-        user = await Users.findOne({userEmail, userIsActive:true});
+        user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true});
         //si no existe el user devuelve null
         if ( !user ) {
              user = new User({ 
@@ -159,7 +159,8 @@ const loginUserGoogle = async (req, res) => {
 const loginUserAdmin = async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
-        const user = await Users.findOne({userEmail, userIsActive:true, userIsAdmin: true});
+        // const query = { 'userEmail': { $regex: new RegExp(`^${userEmail}$`), $options: 'i' } };
+        const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true, userIsAdmin: true});
         //si no existe el user devuelve null
         if ( !user ) {
             return res.status(400).json({
