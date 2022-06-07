@@ -45,7 +45,8 @@ const UserSchema = new Schema({
         type: String,
         default: ""
     }
-})
-
+}, {
+    collation: { locale: 'es', strength: 2 }
+ })
 
 module.exports = model('User', UserSchema)
