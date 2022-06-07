@@ -74,6 +74,24 @@ const sendEmail1 = async (req,res,) => {
     }
 }
 
+
+const emailSender = async ( obj ) =>{
+    const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        post: 465,
+        secure: false,
+        auth: {
+            user: "gobeworiginal@gmail.com",
+            pass: process.env.CODE
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+        })
+    
+}
+
+
 const loginActivateMail = async (obj) => {
     if(obj.userIsGoogle) return {};
     const transporter = nodemailer.createTransport({
@@ -89,7 +107,7 @@ const loginActivateMail = async (obj) => {
         }
         })
         
-        console.log('entro a enviar mail')
+        // console.log('entro a enviar mail')
         mailOptions = {
             from: "Remitente",
             to: obj.userEmail,
