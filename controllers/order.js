@@ -3,6 +3,8 @@ const Order = require("../models/Order");
 const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
 const Image = require("../models/Images");
+const { emailSender } = require("./sendEmail");
+const {subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted } = require("./mailMsg");
 const ObjectId = mongoose.Types.ObjectId;
 
 const createOrder = async (req, res) => {
@@ -116,6 +118,64 @@ const getCarritoByUser = async (req, res) => {
         // productsDB
     })
 }
+//Carrito es una orden con estado 0
+const getCarritoByOrder = async (orderId) => {
+    // console.log(orderId)
+    const order = await Order
+    .aggregate([
+        {$match: {_id: ObjectId(orderId)}},
+        {$lookup: {
+            from: 'orderproducts',
+            localField:  '_id',
+            foreignField:'orderId',
+            as: 'cart'            
+        }},
+        {$lookup: {
+            from: 'users',
+            localField:  'userId',
+            foreignField:'_id',
+            as: 'user'            
+        }}
+    ])
+    // console.log(order[0].user)
+    if(!order){
+        throw {
+            ok: false,
+            msg: 'No existe una orden con ese id'
+        }
+    }
+    const products = order[0]?.cart?.map(item =>  item.productId)
+    // console.log(products)
+
+    if(!products) throw {ok: false, msg: 'El usuario no tiene un carrito de compras'}
+    const productsDB = await Product.find({_id: {$in: products}}).select('_id productName productStock')
+    const obj = {
+        orderId : order[0]._id,
+        _id : order[0]._id,
+        orderState : order[0].orderState,
+        orderTotal : order[0].orderTotal,
+        userId : order[0].userId,
+        shippingAddressId : order[0].shippingAddressId,
+        cart : order[0].cart.map(item => {
+            return {
+                _id : item._id,
+                productId : item.productId,
+                productName: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productName,
+                productStock: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productStock,
+                productCant : item.productCant,
+                productPrice : item.productPrice
+                
+            }
+        }),
+        user: order[0].user
+    }
+    // console.log(obj)
+
+    return {
+        ok: true,
+        obj
+     }
+}
 /**
 {
   userId: '629a6e92b98b31e4c460864b',
@@ -187,7 +247,11 @@ const updateCarrito = async (req, res) => {
 const orderEntered = async (req, res) => {
     const { orderId } = req.query;
     try {
-        await updateOrderState(orderId, 1)
+        await updateOrderState(orderId, 1);
+        const order = await getCarritoByOrder(orderId);
+        const html = await htmlOrderEntered(order.obj)
+        const email = order.obj.user[0].userEmail
+        await emailSender(subjectOrderEntered, html, email)
         res.json({
             ok: true,
             orderId
@@ -207,7 +271,12 @@ const orderPaid = async (req, res) => {
     
     try {
         await updateOrderState(external_reference, 2, payment_id, payment_type )
-        res.redirect(`${process.env.URL_SITE}`)
+        const order = await getCarritoByOrder(external_reference);
+        const html = await htmlPaidAccepted(order.obj)
+        const email = order.obj.user[0].userEmail
+        // console.log(html)
+        await emailSender(subjectPaidAccepted, html, email)
+        res.redirect(`${process.env.URL_SITE_FRONT}`)
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -252,7 +321,7 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
     const orderDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
     // console.log(orderDate)
     switch (orderState) {
-        case 1:x
+        case 1:
             await Order.findByIdAndUpdate(orderId, {orderState: 1, orderCreationDate: orderDate});
             break;
         case 2:
