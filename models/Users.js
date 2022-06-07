@@ -1,39 +1,43 @@
 const { Schema, model } = require('mongoose')
 
 const UserSchema = new Schema({
-    userEmail:{
+    userEmail: {
         type: String,
         unique: true,
-        required: true
+        required: true,
+        //  index: {
+        //      unique: true,
+        //      collation: { locale: 'es', strength: 2 }
+        // }
     },
-    userPassword:{
+    userPassword: {
         type: String
     },
-    userIsActive:{
+    userIsActive: {
         type: Boolean,
         default: true
     },
-    userIsAdmin:{
+    userIsAdmin: {
         type: Boolean,
         default: false
     },
-    userCreationDate:{
+    userCreationDate: {
         type: Date,
         default: Date.now
     },
-    userIsGoogle:{
+    userIsGoogle: {
         type: Boolean,
         default: false
     },
-    userFirstName:{
+    userFirstName: {
         type: String,
         required: true
     },
-    userLastName:{
+    userLastName: {
         type: String,
         required: true
     },
-    userIsSuperAdmin:{
+    userIsSuperAdmin: {
         type: Boolean,
         default: false
     },
@@ -41,12 +45,18 @@ const UserSchema = new Schema({
         type: String,
         default: ""
     },
-    userImage:{
+    userImage: {
         type: String,
         default: ""
     }
-}, {
-    collation: { locale: 'es', strength: 2 }
- })
+})
+// , {
+//     collation: { locale: 'es', strength: 2 }
+//  }
+
+//  index: {
+//     unique: true,
+//     collation: { locale: 'en', strength: 2 }
+//   }
 
 module.exports = model('User', UserSchema)

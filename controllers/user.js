@@ -4,7 +4,9 @@ bcrypt = require('bcryptjs');
 const Users = require('../models/Users');
 const User = require('../models/Users');
 const { generateJWT, generateHash } = require('../helpers/jwt');
-const { loginActivateMail } = require('./sendEmail');
+// const { loginActivateMail } = require('./sendEmail');
+const { htmlNewEmail, subjectNewEmail } = require('./mailMsg');
+const { emailSender } = require('./sendEmail');
 
 const createUser = async (req, res) => {
     const { 
@@ -32,8 +34,15 @@ const createUser = async (req, res) => {
 
          await newUser.save()
          const token = await generateJWT( newUser._id, newUser.userName );
-         let resMail = await loginActivateMail({userEmail, userFirstName, _id:newUser._id, hash, userIsGoogle})
-         
+        //  let resMail = await loginActivateMail({userEmail, userFirstName, _id:newUser._id, hash, userIsGoogle})
+        let resMail = {};
+        if(!userIsGoogle){
+            const link = !!userIsAdmin 
+                ? `${process.env.URL_SITE_ADMIN}activate/${newUser._id}/${hash}/${userEmail}`
+                : `${process.env.URL_SITE_FRONT}activate/${newUser._id}/${hash}/${userEmail}`
+            const html = htmlNewEmail({userEmail, userFirstName,  link})
+            resMail = await emailSender(subjectNewEmail, html, userEmail)
+        }
          
         res.status(201).json({
             ok: true,
@@ -85,7 +94,7 @@ const updateUser = async (req, res) => {
 const loginUser = async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
-        const user = await Users.findOne({userEmail, userIsActive:true});
+        const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true});
         //si no existe el user devuelve null
         if ( !user ) {
             return res.status(400).json({
@@ -128,7 +137,7 @@ const loginUserGoogle = async (req, res) => {
         userIsActive, userIsGoogle, userImage } = req.body;
     try {
         let user;
-        user = await Users.findOne({userEmail, userIsActive:true});
+        user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true});
         //si no existe el user devuelve null
         if ( !user ) {
              user = new User({ 
@@ -159,7 +168,8 @@ const loginUserGoogle = async (req, res) => {
 const loginUserAdmin = async (req, res) => {
     const { userEmail, userPassword } = req.body;
     try {
-        const user = await Users.findOne({userEmail, userIsActive:true, userIsAdmin: true});
+        // const query = { 'userEmail': { $regex: new RegExp(`^${userEmail}$`), $options: 'i' } };
+        const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true, userIsAdmin: true});
         //si no existe el user devuelve null
         if ( !user ) {
             return res.status(400).json({
