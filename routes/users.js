@@ -15,8 +15,8 @@ router.post(
         check('userEmail', 'El email es obligatorio.').not().isEmpty(),
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
-            return User.find({ userEmail: value }).then(user => {
-                if (!user) {
+            return User.find({ userEmail: { $regex: new RegExp(`^${value}$`), $options: 'i' } }).then(user => {
+                if (user) {
                     return Promise.reject('Ya hay un usuario con ese email.');
                 }
             });
@@ -26,7 +26,7 @@ router.post(
             .not()
             .isIn(['123456', 'password1', 'god123'])
             .withMessage('No es una constraseña segura')
-            .isLength({ min: 5 }),
+            .isLength({ min: 6 }),
         // .matches(/\d/),
         check('userFirstName', firstNameReq).not().isEmpty(),
         check('userLastName', lastNameReq).not().isEmpty(),
@@ -40,8 +40,8 @@ router.post(
         check('userEmail', 'El email es obligatorio.').not().isEmpty(),
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
-            return User.find({ userEmail: value }).then(user => {
-                if (!user) {
+            return User.find({ userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' } }).then(user => {
+                if (user) {
                     return Promise.reject('Ya hay un usuario con ese email.');
                 }
             });
