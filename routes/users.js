@@ -144,6 +144,40 @@ router.get('/all', async (req, res) => {
     }
 
 })
+router.get('/allByActive/:isActive' , async (req, res) => {
+    const { isActive } = req.params;
+    const userIsActive = isActive === 'true' ? true :  false;
+    try {
+        const users = await User.find({ userIsActive });
+        res.json({
+            ok: true,
+            users
+        })
+    } catch (error) {
+        res.json({
+            ok: false,
+            msg: 'Error: ' + error
+        })
+    }
+
+})
+router.get('/allByAdmin/:isAdmin' , async (req, res) => {
+    const { isAdmin } = req.params;
+    const userIsAdmin = isAdmin === 'true' ? true :  false;
+    try {
+        const users = await User.find({ userIsAdmin });
+        res.json({
+            ok: true,
+            users
+        })
+    } catch (error) {
+        res.json({
+            ok: false,
+            msg: 'Error: ' + error
+        })
+    }
+
+})
 
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
