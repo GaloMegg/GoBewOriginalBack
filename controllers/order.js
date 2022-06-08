@@ -415,6 +415,23 @@ const getAllOrders = async (req, res) => {
     }
 }
 
+const updateShippingId = async (req, res) => {
+    const { orderId, shippingAddressId } = req.body;
+    console.log(orderId, shippingAddressId)
+    try {
+        await Order.findByIdAndUpdate(orderId, {shippingAddressId});
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 module.exports = {
     createOrder,
     getCarritoByUser,
@@ -425,5 +442,6 @@ module.exports = {
     deleteOrder,
     orderPaidPending,
     getOrderById,
-    getAllOrders
+    getAllOrders,
+    updateShippingId
 }

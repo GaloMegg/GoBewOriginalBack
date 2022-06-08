@@ -7,11 +7,12 @@ const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
 const { 
         createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, 
-        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders 
+        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId 
 } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const Address = require('../models/Address');
 const ObjectId = mongoose.Types.ObjectId;
 require('dotenv').config()
 // curl -X POST -H "Content-Type: application/json" "https://api.mercadopago.com/users/test_user?access_token=process.env.ACCESS_TOKEN_TEST" -d "{'site_id':'MLA'}"
@@ -295,6 +296,27 @@ router.get('/order/byId/:orderId',
 ],
 getOrderById)
 
-router.get('/order/getAll', validateJWT, getAllOrders)
+router.get('/order/getAll', getAllOrders)
 
+router.put('/order/updateShipping',[
+    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+    check('orderId').custom(value => {
+        return Order.findById(value).then(order => {
+            if (!order) {
+                return Promise.reject('No hay una orden con ese id.');
+            }
+        });
+    }),
+    check("shippingAddressId", "La direccion de envio es obligatorio").not().isEmpty(),
+    check("shippingAddressId").custom(value => {
+        return Address.findById(value).then(address => {
+            if (!address) {
+                return Promise.reject('No hay una direccion con ese id.');
+            }
+        });
+    }),
+    validateFields,
+    validateJWT
+],
+updateShippingId)
 module.exports = router;
