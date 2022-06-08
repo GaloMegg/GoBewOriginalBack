@@ -4,7 +4,8 @@ const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
 const Image = require("../models/Images");
 const { emailSender } = require("./sendEmail");
-const { subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted } = require("./mailMsg");
+const {subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted } = require("./mailMsg");
+const { objCarritoToReturn } = require("./orderAux");
 const ObjectId = mongoose.Types.ObjectId;
 
 const createOrder = async (req, res) => {
@@ -89,133 +90,59 @@ const getCarritoByUser = async (req, res) => {
                 }
             }])
     // console.log(productsDB)
-    const obj = {
-        orderId: order[0]?._id,
-        _id: order[0]?._id,
-        orderState: order[0]?.orderState,
-        orderTotal: order[0]?.orderTotal,
-        userId: order[0]?.userId,
-        shippingAddressId: order[0]?.shippingAddressId,
-        cart: order[0]?.cart.map(item => {
-            return {
-                _id: item._id,
-                productId: item.productId,
-                productName: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productName,
-                productStock: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productStock,
-                productCant: item.productCant,
-                productPrice: item.productPrice,
-                images: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].images,
-                // images: productsImage?.filter(image => image?.productId?.toString() === item.productId.toString())[0]
-            }
-        })
-    }
-
+    const obj = objCarritoToReturn(order[0], productsDB)
 
     res.status(200).json({
         ok: true,
         obj
-        // ,
-        // order,
-        // productsDB
     })
 }
-//Carrito es una orden con estado 0
+
+
+//trae la orden por id
 const getCarritoByOrder = async (orderId) => {
-    // console.log(orderId)
     const order = await Order
-        .aggregate([
-            { $match: { _id: ObjectId(orderId) } },
-            {
-                $lookup: {
-                    from: 'orderproducts',
-                    localField: '_id',
-                    foreignField: 'orderId',
-                    as: 'cart'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'user'
-                }
-            }
-        ])
-    // console.log(order[0].user)
-    if (!order) {
+    .aggregate([
+        {$match: {_id: ObjectId(orderId)}},
+        {$lookup: {
+            from: 'orderproducts',
+            localField:  '_id',
+            foreignField:'orderId',
+            as: 'cart'            
+        }},
+        {$lookup: {
+            from: 'users',
+            localField:  'userId',
+            foreignField:'_id',
+            as: 'user'            
+        }}
+    ])
+    if(!order){
         throw {
             ok: false,
             msg: 'No existe una orden con ese id'
         }
     }
-    const products = order[0]?.cart?.map(item => item.productId)
-    // console.log(products)
+    const products = order[0]?.cart?.map(item =>  item.productId)
 
-    if (!products) throw { ok: false, msg: 'El usuario no tiene un carrito de compras' }
-    const productsDB = await Product.find({ _id: { $in: products } }).select('_id productName productStock')
-    const obj = {
-        orderId: order[0]._id,
-        _id: order[0]._id,
-        orderState: order[0].orderState,
-        orderTotal: order[0].orderTotal,
-        userId: order[0].userId,
-        shippingAddressId: order[0].shippingAddressId,
-        cart: order[0].cart.map(item => {
-            return {
-                _id: item._id,
-                productId: item.productId,
-                productName: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productName,
-                productStock: productsDB.filter(product => product._id.toString() === item.productId.toString())[0].productStock,
-                productCant: item.productCant,
-                productPrice: item.productPrice
-
-            }
-        }),
-        user: order[0].user
-    }
-    // console.log(obj)
-
+    if(!products) throw {ok: false, msg: 'El usuario no tiene un carrito de compras'}
+    const productsDB = await Product.find({_id: {$in: products}}).select('_id productName productStock')
+    const obj ={ ...objCarritoToReturn(order[0], productsDB)}
     return {
         ok: true,
         obj
     }
 }
-/**
-{
-  userId: '629a6e92b98b31e4c460864b',
-  orderTotal: 186471,
-  shippingAddressId: '',
-  cart: [
-    {
-      _id: '6290d8e06655f25f6df9a9f8',
-      quantity: 2,
-      productPrice: 20001,
-      productName: 'Celular ZTEA'
-    },
-    {
-      _id: '6290d9a66655f25f6df9a9fc',
-      quantity: 1,
-      productPrice: 146469,
-      productName: 'Celular Xiaomi Redmi Note 10 PRO 8GB + 128 GB Onyx Grey'
-    }
-  ]
-}
- */
+
 const updateCarrito = async (req, res) => {
     const { orderId, orderTotal } = req.body;
-    // console.log(orderId, orderTotal)    
     const session = await Order.startSession();
     session.startTransaction();
     try {
         const opts = { session };
-        // console.log(1)
-        await OrderProduct.deleteMany({ orderId: ObjectId(orderId) }, opts);
-        // console.log(2)
-        const order = await Order.findByIdAndUpdate(orderId, { orderTotal }, opts);
-        // console.log(3)
-        // console.log(order)       
-
+        await OrderProduct.deleteMany({orderId: ObjectId(orderId)}, opts);
+        const order = await Order.findByIdAndUpdate(orderId, {orderTotal}, opts);            
+        
         const orderProduct = req.body.cart.map(item => {
             return {
                 orderId,
@@ -254,7 +181,7 @@ const orderEntered = async (req, res) => {
     try {
         await updateOrderState(orderId, 1);
         const order = await getCarritoByOrder(orderId);
-        const html = await htmlOrderEntered(order.obj)
+        const html =  htmlOrderEntered(order.obj)
         const email = order.obj.user[0].userEmail
         await emailSender(subjectOrderEntered, html, email)
         res.json({
@@ -277,9 +204,8 @@ const orderPaid = async (req, res) => {
     try {
         await updateOrderState(external_reference, 2, payment_id, payment_type)
         const order = await getCarritoByOrder(external_reference);
-        const html = await htmlPaidAccepted(order.obj)
+        const html =  htmlPaidAccepted(order.obj)
         const email = order.obj.user[0].userEmail
-        // console.log(html)
         await emailSender(subjectPaidAccepted, html, email)
         res.redirect(`${process.env.URL_SITE_FRONT}`)
     } catch (error) {
@@ -289,6 +215,7 @@ const orderPaid = async (req, res) => {
         })
     }
 }
+//TODO: enviar correo de rechazo de pago
 
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
@@ -305,6 +232,8 @@ const orderPaidRejected = async (req, res) => {
         })
     }
 }
+//TODO: enviar correo de orden pendiende de pago de pago
+
 const orderPaidPending = async (req, res) => {
     const { external_reference } = req.query;
     try {
@@ -320,6 +249,7 @@ const orderPaidPending = async (req, res) => {
         })
     }
 }
+//TODO: fciones para cambiar estado cancelado, enviado, entregado (todas con su email)
 
 const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
     const date = new Date();
@@ -334,10 +264,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             session.startTransaction();
             try {
                 const opts = { session };
-                await Order.findByIdAndUpdate(orderId, { orderState: 2, orderAceptDate: orderDate, payment_id, payment_type }, opts);
-                const orderProducts = await OrderProduct.find({ orderId: ObjectId(orderId) }, null, opts);
-                // console.log(1, orderProducts)
-                await Promise.all(orderProducts.map(item => Product.findByIdAndUpdate(item.productId, { "$inc": { productStock: -Number(item.productCant) } }, { new: true, opts })))
+                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: orderDate, payment_id, payment_type}, opts);
+                const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
+                await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
                 await session.commitTransaction();
                 session.endSession();
                 return {
@@ -387,6 +316,80 @@ const deleteOrder = async (req, res) => {
     }
 }
 
+const getOrderById = async (req, res) => {
+    const orderId = req.params.orderId;
+    try {
+        const order = await getCarritoByOrder(orderId)
+        console.log(order)
+        res.json(order)
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
+const getAllOrders = async (req, res) => {
+    try {
+        const order = await Order
+        .aggregate([
+            {$lookup: {
+                from: 'users',
+                localField:  'userId',
+                foreignField:'_id',
+                as: 'user'            
+            }},
+            {$lookup: {
+                from: 'orderproducts',
+                localField:  '_id',
+                foreignField:'orderId',
+                as: 'orderproducts'            
+            }},
+            {
+                $unwind: {
+                  path: "$orderproducts",
+                  preserveNullAndEmptyArrays: true
+                }
+            },
+            
+            {$lookup: {
+                from: 'products',                
+                localField:  'orderproducts.productId',
+                foreignField:'_id',
+                as: 'orderproducts.products'            
+            }},
+            {
+                $group: {
+                    _id : "$_id",
+                    user: {$first: "$user"},
+                    orderproducts: {$push: "$orderproducts" }
+                }
+            }
+            
+        ])
+        console.log(order)
+        if(!order){
+            throw {
+                ok: false,
+                msg: 'No hay ordenes de compra ingresadas'
+            }
+        }
+        // const products = order[0]?.cart?.map(item =>  item.productId)
+    
+        // if(!products) throw {ok: false, msg: 'El usuario no tiene un carrito de compras'}
+        // const productsDB = await Product.find({_id: {$in: products}}).select('_id productName productStock')
+        // const obj ={ ...objCarritoToReturn(order[0], productsDB)}
+
+        res.json(order)
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 module.exports = {
     createOrder,
     getCarritoByUser,
@@ -395,5 +398,7 @@ module.exports = {
     orderPaid,
     orderPaidRejected,
     deleteOrder,
-    orderPaidPending
+    orderPaidPending,
+    getOrderById,
+    getAllOrders
 }
