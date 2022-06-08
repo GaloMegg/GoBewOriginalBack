@@ -363,22 +363,33 @@ const getAllOrders = async (req, res) => {
                     user: {$first: "$user"},
                     orderproducts: {$push: "$orderproducts" }
                 }
-            }
+            },
             
+            {
+              "$project": {
+                "_id": 1,
+                "user._id": 1,
+                "user.userEmail": 1,
+                "user.userFirstName": 1,
+                "user.userLastName": 1,
+                "orderproducts._id": 1,
+                "orderproducts.orderId": 1,
+                "orderproducts.productId": 1,
+                "orderproducts.productCant": 1,
+                "orderproducts.productPrice": 1,
+                "orderproducts.products._id": 1,
+                "orderproducts.products.productName": 1,
+              }
+            }
+
         ])
-        console.log(order)
+
         if(!order){
             throw {
                 ok: false,
                 msg: 'No hay ordenes de compra ingresadas'
             }
         }
-        // const products = order[0]?.cart?.map(item =>  item.productId)
-    
-        // if(!products) throw {ok: false, msg: 'El usuario no tiene un carrito de compras'}
-        // const productsDB = await Product.find({_id: {$in: products}}).select('_id productName productStock')
-        // const obj ={ ...objCarritoToReturn(order[0], productsDB)}
-
         res.json(order)
     } catch (error) {
         res.status(404).json({
