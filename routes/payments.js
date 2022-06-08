@@ -7,7 +7,7 @@ const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
 const { 
         createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, 
-        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId 
+        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId
 } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');

@@ -36,6 +36,10 @@ const orderSchema = new Schema({
         type: Date,
         default:null
     },
+    orderArrivalDate: {
+        type: Date,
+        default:null
+    },
     orderCancelDate: {
         type: Date,
         default:null
