@@ -329,9 +329,13 @@ const getOrderById = async (req, res) => {
 }
 
 const getAllOrders = async (req, res) => {
+    const { orderState } = req.query;
+    const matchState  = orderState ? {orderState: Number(orderState)} : {};
     try {
         const order = await Order
+
         .aggregate([
+            {$match: matchState},
             {$lookup: {
                 from: 'users',
                 localField:  'userId',
@@ -360,6 +364,12 @@ const getAllOrders = async (req, res) => {
             {
                 $group: {
                     _id : "$_id",
+                    orderState: {$first: "$orderState"},
+                    orderTotal: {$first: "$orderTotal"},
+                    orderCreationDate: {$first: "$orderCreationDate"},
+                    orderAceptDate: {$first: "$orderAceptDate"},
+                    orderDeliverDate: {$first: "$orderDeliverDate"},
+                    orderCancelDate: {$first: "$orderCancelDate"},
                     user: {$first: "$user"},
                     orderproducts: {$push: "$orderproducts" }
                 }
@@ -367,18 +377,24 @@ const getAllOrders = async (req, res) => {
             
             {
               "$project": {
-                "_id": 1,
-                "user._id": 1,
-                "user.userEmail": 1,
-                "user.userFirstName": 1,
-                "user.userLastName": 1,
-                "orderproducts._id": 1,
-                "orderproducts.orderId": 1,
-                "orderproducts.productId": 1,
-                "orderproducts.productCant": 1,
-                "orderproducts.productPrice": 1,
-                "orderproducts.products._id": 1,
-                "orderproducts.products.productName": 1,
+                  "_id": 1,
+                  "orderState": 1,
+                  "orderTotal": 1,
+                    "orderCreationDate": 1,
+                    "orderAceptDate": 1,
+                    "orderDeliverDate": 1,
+                    "orderCancelDate": 1,
+                    "user._id": 1,
+                    "user.userEmail": 1,
+                    "user.userFirstName": 1,
+                    "user.userLastName": 1,
+                    "orderproducts._id": 1,
+                    "orderproducts.orderId": 1,
+                    "orderproducts.productId": 1,
+                    "orderproducts.productCant": 1,
+                    "orderproducts.productPrice": 1,
+                    "orderproducts.products._id": 1,
+                    "orderproducts.products.productName": 1,
               }
             }
 
