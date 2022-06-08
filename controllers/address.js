@@ -2,14 +2,16 @@ const Address = require("../models/Address");
 const Order = require("../models/Order");
 
 const createUserAddress = async (req, res) => {
-    const { userId, addressComment, orderId } = req.body;
+    const { userId, addressComment,addressStreet, addressNumber, addressFloor, addressFlat, addressCity, addressZipCode, addressProvince, orderId } = req.body;
     const addressIsShipping = true;
     const addressIsBilling = true;
+
+    
     const session = await Order.startSession();
     session.startTransaction();
     try {
         const opts = { session };
-        const newAddress = new Address({ userId, addressComment, addressIsShipping, addressIsBilling }, opts);
+        const newAddress = new Address({ userId, addressComment, addressIsShipping, addressIsBilling, addressStreet, addressNumber, addressFloor, addressFlat, addressCity, addressZipCode, addressProvince }, opts);
         await newAddress.save();
         await Order.findByIdAndUpdate(orderId, { shippingAddressId: newAddress._id }, opts);
 

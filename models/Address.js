@@ -28,9 +28,8 @@ const addressSchema = new Schema({
         type: String,
         // required: true
     },
-    provinceId: {
-        type: Schema.ObjectId,
-        ref: 'Province',
+    addressProvince: {
+        type: String
         // required: true
     },
     addressComment: {
