@@ -7,7 +7,7 @@ const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
 const { 
         createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, 
-        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId
+        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId, orderDelivered
 } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
@@ -264,6 +264,21 @@ router.get('/entered',
     validateJWT
 ],
 orderEntered
+)
+router.get('/delivered',
+[
+    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+    check('orderId').custom(value => {
+        return Order.findById(value).then(order => {
+            if (!order) {
+                return Promise.reject('No hay una orden con ese id.');
+            }
+        });
+    }),
+    validateFields,
+    validateJWT
+],
+orderDelivered
 )
 //Solamente se pueden eliminar carritos (orderState: 0)
 router.delete('/order/:orderId',
