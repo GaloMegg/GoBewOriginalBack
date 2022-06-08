@@ -39,6 +39,18 @@ const htmlPaidAccepted = (obj) =>{
     <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>`
     return html;
 }
+const htmlPaidRejected = (obj) =>{
+    
+    const html = `<p><span>Hola ${obj.user[0].userFirstName},</span></p>
+    <span>Su compra nro: ${obj.orderId} fue rechazada.</p>
+
+    <p>Compra cancelada:</p>
+    <table>${orderCart(obj.cart)}</table>
+    <p>Por un total de $ ${obj.orderTotal}</p>
+    <p>Por cualquier duda no dude en contactarnos,</p>
+    <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>`
+    return html;
+}
 const htmlOrderEntered = (obj) =>{
     // console.log(obj)
     let elements = ''
@@ -113,5 +125,6 @@ module.exports = {
     htmlNewEmail,
     htmlPaidAccepted,
     subjectOrderEntered,
-    htmlOrderEntered
+    htmlOrderEntered,
+    htmlPaidRejected
 }
