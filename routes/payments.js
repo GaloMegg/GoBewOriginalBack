@@ -62,9 +62,9 @@ router.post('/pay', async (req, res) => {
         // Esto debe ser el ID de la base de datos de la orden
         external_reference: orderId,
         back_urls: {
-            success: `http://localhost:4000/payments/success`,
-            failure: `http://localhost:4000/payments/failure`,
-            pending: `http://localhost:4000/payments/pending`
+            success: `${process.env.URL_BACK}payments/success`,
+            failure: `${process.env.URL_BACK}payments/failure`,
+            pending: `${process.env.URL_BACK}payments/pending`
         },
         payment_methods: {
             excluded_payment_methods: [
