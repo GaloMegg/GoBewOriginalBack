@@ -5,7 +5,10 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, orderPaidRejected, orderPaidPending, getOrderById } = require('../controllers/order');
+const { 
+        createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, 
+        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders 
+} = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -291,5 +294,7 @@ router.get('/order/byId/:orderId',
     validateJWT
 ],
 getOrderById)
+
+router.get('/order/getAll', validateJWT, getAllOrders)
 
 module.exports = router;
