@@ -35,3 +35,6 @@ createReview)
 
 
 router.get('byProduct/:productId', listProductReviews)
+
+
+module.exports = router;
