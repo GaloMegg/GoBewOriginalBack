@@ -34,7 +34,7 @@ createReview)
 
 
 
-router.get('byProduct/:productId', listProductReviews)
+router.get('/byProduct/:productId', listProductReviews)
 
 
 module.exports = router;
