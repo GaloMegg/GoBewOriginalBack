@@ -4,7 +4,7 @@ const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
 const Image = require("../models/Images");
 const { emailSender } = require("./sendEmail");
-const { subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted } = require("./mailMsg");
+const {subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted, subjectPaidRejected, htmlPaidRejected } = require("./mailMsg");
 const { objCarritoToReturn } = require("./orderAux");
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -199,6 +199,7 @@ const orderEntered = async (req, res) => {
         })
     }
 }
+
 //Estado 2 => PAGO ACEPTADO
 //TODO: Enviar correo de confirmacion de pago
 
@@ -219,16 +220,18 @@ const orderPaid = async (req, res) => {
         })
     }
 }
-//TODO: enviar correo de rechazo de pago
+//TODO: probar correo de rechazo de pago
 
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
     try {
         await updateOrderState(external_reference, 5)
-        res.json({
-            ok: true,
-            orderId: external_reference
-        })
+        const order = await getCarritoByOrder(external_reference);
+        const html =  htmlPaidRejected(order.obj)
+        const email = order.obj.user[0].userEmail
+        await emailSender(subjectPaidRejected, html, email)
+        res.redirect(`${process.env.URL_SITE_FRONT}`)
+
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -254,15 +257,24 @@ const orderPaidPending = async (req, res) => {
     }
 }
 //TODO: fciones para cambiar estado cancelado, enviado, entregado (todas con su email)
-
+// Order state
+// 0 Carrito
+// 1 ingresada (restar al stock la cant)
+// 2 pago aceptado
+// 3 enviada
+// 4 recibida
+// 5 rechazada (al rechazar sumar al stock)
+// 6 cancelada
+// 7 pendiente de aprobación
 const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
     const date = new Date();
     const orderDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
-    // console.log(orderDate)
     switch (orderState) {
+        //INGRESADA
         case 1:
             await Order.findByIdAndUpdate(orderId, { orderState: 1, orderCreationDate: orderDate });
             break;
+        //PAGO ACEPTADO
         case 2:
             const session = await Order.startSession();
             session.startTransaction();
@@ -279,15 +291,30 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             } catch (error) {
                 await session.abortTransaction();
                 session.endSession();
-                // console.log(error)
+                
                 return {
                     ok: false,
                     msg: error
                 }
             }
+        
+        //ENVIADA
+        case 3:
+            await Order.findByIdAndUpdate(orderId, {orderState: 3, orderDeliverDate: orderDate});
+            break;
+        //RECIBIDA
+        case 4:
+            await Order.findByIdAndUpdate(orderId, {orderState: 4, orderArrivalDate: orderDate});
+            break;
+        //RECHAZADA
         case 5:
             await Order.findByIdAndUpdate(orderId, { orderState: 5, orderRejectDate: orderDate });
             break;
+        //CANCELADA
+        case 6:
+            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderRejectDate: orderCancelDate});
+            break;
+        //PENDIENTE DE APROBACION
         case 7:
             await Order.findByIdAndUpdate(orderId, { orderState: 7, orderPendingDate: orderDate });
             break;

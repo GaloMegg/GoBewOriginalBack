@@ -15,8 +15,10 @@ router.post(
         check('userEmail', 'El email es obligatorio.').not().isEmpty(),
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
-            return User.find({ userEmail: { $regex: new RegExp(`^${value}$`), $options: 'i' } }).then(user => {
-                if (user) {
+            // console.log(1,value)
+            return User.find({ userEmail: { $regex: new RegExp('^'+value+'$', "i")} }).then(user => {
+            // console.log(1,user)                
+                if (user.length > 0) {
                     return Promise.reject('Ya hay un usuario con ese email.');
                 }
             });
@@ -41,7 +43,7 @@ router.post(
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
             return User.find({ userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' } }).then(user => {
-                if (user) {
+                if (user.length > 0) {
                     return Promise.reject('Ya hay un usuario con ese email.');
                 }
             });
