@@ -1,12 +1,14 @@
 bcrypt = require('bcryptjs');
 // const nodemailer = require("nodemailer")
-
+const mongoose = require("mongoose");
 const Users = require('../models/Users');
 const User = require('../models/Users');
 const { generateJWT, generateHash } = require('../helpers/jwt');
 // const { loginActivateMail } = require('./sendEmail');
 const { htmlNewEmail, subjectNewEmail } = require('./mailMsg');
 const { emailSender } = require('./sendEmail');
+
+const ObjectId = mongoose.Types.ObjectId;
 
 const createUser = async (req, res) => {
     const { 
@@ -256,6 +258,36 @@ const updateUserActiveState = async (req, res) => {
         })
     }
 }
+
+const userActivateCta = async (req, res) => {
+
+    const { userId, hash, userEmail } = req.params;
+    
+    let user;
+    try {
+         user = await User.findOne({_id: ObjectId(userId), hash: hash, userEmail: userEmail});
+        if (!user) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario no encontrado.'
+            })
+        } else {
+             user = await User.findByIdAndUpdate(userId, { userIsActive: true, hash:'' }, { new: true })
+            res.status(201).json({
+                ok: true,
+                msg: 'Usuario activado.',
+                user
+            })
+        }
+    } 
+    catch (error) {
+        res.json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 module.exports = {
     createUser,
     updateUser,
@@ -263,5 +295,6 @@ module.exports = {
     loginUserGoogle,
     loginUserAdmin,
     renewToken,
-    updateUserActiveState
+    updateUserActiveState,
+    userActivateCta
 }
