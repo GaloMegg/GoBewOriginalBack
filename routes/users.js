@@ -192,6 +192,23 @@ router.get('/:userId', async (req, res) => {
     }
 });
 
+router.get('/byName/:userName', async (req, res) => {
+    const { userName } = req.params;
+    console.log(userName)
+    try {
+        // const user = await User.find({ userFirstName: { $regex: new RegExp(`^${userName}$`, 'i') } });
+        const user = await User.find({
+            $or: [
+              { 'userFirstName':  { $regex: '.*' + userName + '.*', '$options': 'i' } },
+              { 'userLastName': { $regex: '.*' + userName + '.*', '$options': 'i' }}
+            ]
+          });
+        res.status(201).json(user);
 
+    } catch (error) {
+        res.status(404).send('No existe un usuario con el nombre seleccionado')
+
+    }
+})
 
 module.exports = router;

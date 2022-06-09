@@ -2,11 +2,12 @@ const subjectOrderEntered = 'Realizaste una compra en GoBew!'
 const subjectPaidAccepted = 'Tu compra en GoBew fue aceptado!'
 const subjectPaidRejected = 'Tu compra en GoBew fue rechazada'
 const subjectPaidPending = 'Tu compra en GoBew está pendiente'
-const subjectPaidCanceled = 'Tu compra en GoBew fue cancelada'
+const subjectPaidCancelled = 'Tu compra en GoBew fue cancelada'
 const subjectNewAccount = 'Bienvenido a GoBew!'
 const subjectNewPassword = 'Cambio de contraseña en GoBew'
 const subjectNewEmail = 'Confirmación de Email'
-
+const subjectOrderDelivered = 'Tu pedido en GoBew ha sido enviado!'
+const subjectOrderArrived = 'Recibiste tu pedido, qué lo disfrutes!'
 const htmlNewEmail =({userEmail, userFirstName,  link}) =>{ 
     const html= `<p><span>Hola ${userFirstName},</span></p>
     <span>Gracias por registrarte en GoBew! Estamos encantados de tenerte a bordo y trataremos de ayudarte lo máximo posible.
@@ -70,6 +71,62 @@ const htmlOrderEntered = (obj) =>{
     // console.log(html)
     return html;
 }
+const htmlOrderArrived = (obj) =>{
+    // console.log(obj)
+    let elements = ''
+    obj.cart.forEach(element => {
+        elements += `<tr><td>${element.productName} x ${element.productCant}</td><td> $ ${element.productPrice}</td></tr>`
+    })
+    const html = `<p><span>Hola ${obj.user[0].userFirstName},</span></p>
+    <span>Recibiste tu pedido! 
+    En caso de que tengas alguna duda o comentario, no dudes en contactarnos.</span>
+    <p>El número de su orden es: ${obj.orderId}.</p>
+    <p>Compraste:</p>
+    <table>${elements}</table>
+    <p>Por un total de $ ${obj.orderTotal}</p>
+    <p>Esperamos que lo disfrutes,<br />Gobew team</p></p>
+    <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>
+    `
+    // console.log(html)
+    return html;
+}
+const htmlOrderDelivered = (obj) =>{
+    // console.log(obj)
+    let elements = ''
+    obj.cart.forEach(element => {
+        elements += `<tr><td>${element.productName} x ${element.productCant}</td><td> $ ${element.productPrice}</td></tr>`
+    })
+    const html = `<p><span>Hola ${obj.user[0].userFirstName},</span></p>
+    <span>Enviamos tu compra en GoBew! 
+    En caso de que tengas alguna duda o comentario, no dudes en contactarnos.</span>
+    <p>El número de su orden es: ${obj.orderId}.</p>
+    <p>Compraste:</p>
+    <table>${elements}</table>
+    <p>Por un total de $ ${obj.orderTotal}</p>
+    <p>Esperamos que lo disfrutes,<br />Gobew team</p></p>
+    <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>
+    `
+    // console.log(html)
+    return html;
+}
+const htmlOrderCancelled = (obj) =>{
+    // console.log(obj)
+    let elements = ''
+    obj.cart.forEach(element => {
+        elements += `<tr><td>${element.productName} x ${element.productCant}</td><td> $ ${element.productPrice}</td></tr>`
+    })
+    const html = `<p><span>Hola ${obj.user[0].userFirstName},</span></p>
+    <span>Tu compra en GoBew ha sido cancelada! </span>
+    <p>Orden cancelada nro: ${obj.orderId}.</p>
+    
+    <table>${elements}</table>
+    <p>Por un total de $ ${obj.orderTotal}</p>
+    <span></span>En caso de que tengas alguna duda o comentario, no dudes en contactarnos.</span>
+    <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>
+    `
+    // console.log(html)
+    return html;
+}
 // {
 //     orderId: new ObjectId("629f69304d989f4c183128a9"),
 //     _id: new ObjectId("629f69304d989f4c183128a9"),
@@ -118,7 +175,7 @@ module.exports = {
     subjectPaidAccepted,
     subjectPaidRejected,
     subjectPaidPending,
-    subjectPaidCanceled,
+    subjectPaidCancelled,
     subjectNewAccount,
     subjectNewPassword,
     subjectNewEmail,
@@ -126,5 +183,10 @@ module.exports = {
     htmlPaidAccepted,
     subjectOrderEntered,
     htmlOrderEntered,
-    htmlPaidRejected
+    htmlPaidRejected,
+    subjectOrderDelivered,
+    htmlOrderDelivered,
+    htmlOrderArrived,
+    subjectOrderArrived,
+    htmlOrderCancelled,
 }
