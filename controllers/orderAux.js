@@ -8,6 +8,18 @@ const objCarritoToReturn = (objOrder, productsDB) => {
         orderTotal : objOrder.orderTotal,
         userId : objOrder.userId,
         shippingAddressId : objOrder.shippingAddressId,
+
+        orderCreationDate: objOrder.orderCreationDate,
+        orderAceptDate: objOrder.orderAceptDate,
+        orderDeliverDate: objOrder.orderDeliverDate,
+        orderCancelDate: objOrder.orderCancelDate,
+        orderRejectDate: objOrder.orderRejectDate,
+        orderPendingDate: objOrder.orderPendingDate,
+        orderDeliverPrice: objOrder.orderDeliverPrice,
+        payment_id: objOrder.payment_id,
+        payment_type: objOrder.payment_type,
+
+
         cart : objOrder.cart.map(item => {
             return {
                 _id : item._id,
