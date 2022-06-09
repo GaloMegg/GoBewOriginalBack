@@ -1,4 +1,4 @@
-const createReview = (req, res) => {
+const createReview = async (req, res) => {
 
     const { productId, userId, reviewStars, reviewComment } = req.body;
 

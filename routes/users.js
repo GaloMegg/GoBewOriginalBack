@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
@@ -116,20 +116,7 @@ router.post(
 // router.get('/adminRenew',validateJWT, renewToken);
 router.get('/renew', validateJWT, renewToken);
 
-router.put(
-    '/activate',
-
-    [
-        check('userId.*.hash.*.userEmail').custom(value => {
-            return User.find(value).then(user => {
-                if (!user) {
-                    return Promise.reject(idInvalid);
-                }
-            });
-        })
-    ]
-
-)
+router.get('/activate/:userId/:hash/:userEmail', userActivateCta);
 
 router.get('/all', async (req, res) => {
     try {

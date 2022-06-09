@@ -339,6 +339,20 @@ router.get('/order/byId/:orderId',
 ],
 getOrderById)
 
+router.get('admin/order/byId/:orderId',
+[
+    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+    check('orderId').custom(value => {
+        return Order.findById(value).then(order => {
+            if (!order) {
+                return Promise.reject('No hay una orden con ese id.');
+            }
+        });
+    }),
+    validateFields
+],
+getOrderById)
+
 router.get('/order/getAll', getAllOrders)
 
 router.put('/order/updateShipping',[
