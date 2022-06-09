@@ -339,7 +339,7 @@ router.get('/order/byId/:orderId',
 ],
 getOrderById)
 
-router.get('admin/order/byId/:orderId',
+router.get('/admin/order/byId/:orderId',
 [
     check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
     check('orderId').custom(value => {
