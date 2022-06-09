@@ -58,6 +58,7 @@ const getCarritoByUser = async (req, res) => {
     const order = await Order
     .aggregate([
         {$match: {userId: ObjectId(userId),orderState:0}},
+        // {$match: { $or: [{userId: ObjectId(userId),orderState:0}, {userId: ObjectId(userId),orderState:1}] }},
         {$lookup: {
             from: 'orderproducts',
             localField:  '_id',
@@ -177,10 +178,10 @@ const orderEntered = async (req, res) => {
     const { orderId } = req.query;
     try {
         await updateOrderState(orderId, 1);
-        const order = await getCarritoByOrder(orderId);
-        const html =  htmlOrderEntered(order.obj)
-        const email = order.obj.user[0].userEmail
-        await emailSender(subjectOrderEntered, html, email)
+        // const order = await getCarritoByOrder(orderId);
+        // const html =  htmlOrderEntered(order.obj)
+        // const email = order.obj.user[0].userEmail
+        // await emailSender(subjectOrderEntered, html, email)
         res.json({
             ok: true,
             orderId
@@ -215,6 +216,7 @@ const orderPaid = async (req, res) => {
 //Estado 5 => PAGO RECHAZADO
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
+    console.log(external_reference)
     try {
         await updateOrderState(external_reference, 5)
         const order = await getCarritoByOrder(external_reference);
@@ -293,6 +295,7 @@ const orderCancelled = async (req, res) => {
     try {
         await updateOrderState(orderId, 6);
         const order = await getCarritoByOrder(orderId);
+        console.log(order)
         const html =  htmlOrderCancelled(order.obj)
         const email = order.obj.user[0].userEmail
         await emailSender(subjectPaidCancelled, html, email)
@@ -363,7 +366,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             break;
         //CANCELADA
         case 6:
-            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderRejectDate: orderCancelDate});
+            console.log(6)
+            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: orderDate});
+            console.log(7)
             break;
         //PENDIENTE DE APROBACION
         case 7:
@@ -529,5 +534,6 @@ module.exports = {
     getAllOrders,
     updateShippingId,
     orderDelivered,
-    orderArrived
+    orderArrived,
+    orderCancelled
 }
