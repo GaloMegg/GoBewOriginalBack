@@ -216,7 +216,7 @@ const orderPaid = async (req, res) => {
 //Estado 5 => PAGO RECHAZADO
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
-    console.log(external_reference)
+    // console.log(external_reference)
     try {
         await updateOrderState(external_reference, 5)
         const order = await getCarritoByOrder(external_reference);
@@ -295,7 +295,7 @@ const orderCancelled = async (req, res) => {
     try {
         await updateOrderState(orderId, 6);
         const order = await getCarritoByOrder(orderId);
-        console.log(order)
+        // console.log(order)
         const html =  htmlOrderCancelled(order.obj)
         const email = order.obj.user[0].userEmail
         await emailSender(subjectPaidCancelled, html, email)
@@ -366,9 +366,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             break;
         //CANCELADA
         case 6:
-            console.log(6)
+            // console.log(6)
             await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: orderDate});
-            console.log(7)
+            // console.log(7)
             break;
         //PENDIENTE DE APROBACION
         case 7:
@@ -407,7 +407,7 @@ const getOrderById = async (req, res) => {
     const orderId = req.params.orderId;
     try {
         const order = await getCarritoByOrder(orderId)
-        console.log(order)
+        // console.log(order)
         res.json(order)
     } catch (error) {
         res.status(404).json({
@@ -506,7 +506,7 @@ const getAllOrders = async (req, res) => {
 
 const updateShippingId = async (req, res) => {
     const { orderId, shippingAddressId } = req.body;
-    console.log(orderId, shippingAddressId)
+    // console.log(orderId, shippingAddressId)
     try {
         await Order.findByIdAndUpdate(orderId, {shippingAddressId});
         res.json({
