@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
-const { createReview } = require("../controllers/reviews");
+const { createReview, listProductReviews } = require("../controllers/reviews");
 const { validateFields } = require("../middlewares/validateFields");
 const { validateJWT } = require("../middlewares/validateJWT");
 const User = require("../models/Users");
@@ -31,3 +31,7 @@ router.post('/',
     check('reviewComment', "El comentario es obligatorio").not().isEmpty()
 ],
 createReview)
+
+
+
+router.get('byProduct/:productId', listProductReviews)
