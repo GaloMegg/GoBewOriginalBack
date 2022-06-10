@@ -4,7 +4,8 @@ const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
 const Image = require("../models/Images");
 const { emailSender } = require("./sendEmail");
-const { subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted, subjectPaidRejected, htmlPaidRejected } = require("./mailMsg");
+const { subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted, subjectPaidRejected, htmlPaidRejected,
+    subjectOrderDelivered, htmlOrderDelivered, htmlOrderArrived, subjectOrderArrived, htmlOrderCancelled, subjectPaidCancelled } = require("./mailMsg");
 const { objCarritoToReturn } = require("./orderAux");
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -57,6 +58,7 @@ const getCarritoByUser = async (req, res) => {
     const order = await Order
         .aggregate([
             { $match: { userId: ObjectId(userId), orderState: 0 } },
+            // {$match: { $or: [{userId: ObjectId(userId),orderState:0}, {userId: ObjectId(userId),orderState:1}] }},
             {
                 $lookup: {
                     from: 'orderproducts',
@@ -178,16 +180,14 @@ const updateCarrito = async (req, res) => {
     }
 }
 //Estado 1 => COMPRA INGRESADA
-//TODO: Enviar correo de compra ingresada (en proceso?)
-
 const orderEntered = async (req, res) => {
     const { orderId } = req.query;
     try {
         await updateOrderState(orderId, 1);
-        const order = await getCarritoByOrder(orderId);
-        const html = htmlOrderEntered(order.obj)
-        const email = order.obj.user[0].userEmail
-        await emailSender(subjectOrderEntered, html, email)
+        // const order = await getCarritoByOrder(orderId);
+        // const html =  htmlOrderEntered(order.obj)
+        // const email = order.obj.user[0].userEmail
+        // await emailSender(subjectOrderEntered, html, email)
         res.json({
             ok: true,
             orderId
@@ -201,8 +201,6 @@ const orderEntered = async (req, res) => {
 }
 
 //Estado 2 => PAGO ACEPTADO
-//TODO: Enviar correo de confirmacion de pago
-
 const orderPaid = async (req, res) => {
     const { external_reference, payment_id, payment_type } = req.query;
 
@@ -221,9 +219,10 @@ const orderPaid = async (req, res) => {
     }
 }
 //TODO: probar correo de rechazo de pago
-
+//Estado 5 => PAGO RECHAZADO
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
+    // console.log(external_reference)
     try {
         await updateOrderState(external_reference, 5)
         const order = await getCarritoByOrder(external_reference);
@@ -239,14 +238,34 @@ const orderPaidRejected = async (req, res) => {
     }
 }
 //TODO: enviar correo de orden pendiende de pago de pago
-
+//Estado 7 => PAGO PENDIENTE
 const orderPaidPending = async (req, res) => {
     const { external_reference } = req.query;
     try {
         await updateOrderState(external_reference, 7)
+
+        res.redirect(`${process.env.URL_SITE_FRONT}`)
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
+//TODO: fciones para cambiar estado cancelado, enviado, entregado (todas con su email)
+//Estado 3 => ENVIADA
+const orderDelivered = async (req, res) => {
+    const { orderId } = req.query;
+    try {
+        await updateOrderState(orderId, 3);
+        const order = await getCarritoByOrder(orderId);
+        const html = htmlOrderDelivered(order.obj)
+        const email = order.obj.user[0].userEmail
+        await emailSender(subjectOrderDelivered, html, email)
         res.json({
             ok: true,
-            orderId: external_reference
+            orderId
         })
     } catch (error) {
         res.status(404).json({
@@ -255,7 +274,48 @@ const orderPaidPending = async (req, res) => {
         })
     }
 }
-//TODO: fciones para cambiar estado cancelado, enviado, entregado (todas con su email)
+//Estado 4 => RECIBIDA
+const orderArrived = async (req, res) => {
+    const { orderId } = req.query;
+    try {
+        await updateOrderState(orderId, 4);
+        const order = await getCarritoByOrder(orderId);
+        const html = htmlOrderArrived(order.obj)
+        const email = order.obj.user[0].userEmail
+        await emailSender(subjectOrderArrived, html, email)
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+//Estado 6 => CANCELADA
+const orderCancelled = async (req, res) => {
+    const { orderId } = req.query;
+    try {
+        await updateOrderState(orderId, 6);
+        const order = await getCarritoByOrder(orderId);
+        // console.log(order)
+        const html = htmlOrderCancelled(order.obj)
+        const email = order.obj.user[0].userEmail
+        await emailSender(subjectPaidCancelled, html, email)
+        res.json({
+            ok: true,
+            orderId
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 // Order state
 // 0 Carrito
 // 1 ingresada (restar al stock la cant)
@@ -311,7 +371,9 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             break;
         //CANCELADA
         case 6:
-            await Order.findByIdAndUpdate(orderId, { orderState: 6, orderRejectDate: orderCancelDate });
+            // console.log(6)
+            await Order.findByIdAndUpdate(orderId, { orderState: 6, orderCancelDate: orderDate });
+            // console.log(7)
             break;
         //PENDIENTE DE APROBACION
         case 7:
@@ -350,7 +412,7 @@ const getOrderById = async (req, res) => {
     const orderId = req.params.orderId;
     try {
         const order = await getCarritoByOrder(orderId)
-        console.log(order)
+        // console.log(order)
         res.json(order)
     } catch (error) {
         res.status(404).json({
@@ -454,7 +516,7 @@ const getAllOrders = async (req, res) => {
 
 const updateShippingId = async (req, res) => {
     const { orderId, shippingAddressId } = req.body;
-    console.log(orderId, shippingAddressId)
+    // console.log(orderId, shippingAddressId)
     try {
         await Order.findByIdAndUpdate(orderId, { shippingAddressId });
         res.json({
@@ -480,5 +542,8 @@ module.exports = {
     orderPaidPending,
     getOrderById,
     getAllOrders,
-    updateShippingId
+    updateShippingId,
+    orderDelivered,
+    orderArrived,
+    orderCancelled
 }
