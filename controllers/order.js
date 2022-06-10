@@ -4,7 +4,7 @@ const OrderProduct = require("../models/orderProduct");
 const Product = require("../models/Product");
 const Image = require("../models/Images");
 const { emailSender } = require("./sendEmail");
-const {subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted, subjectPaidRejected, htmlPaidRejected } = require("./mailMsg");
+const { subjectPaidAccepted, subjectOrderEntered, htmlOrderEntered, htmlPaidAccepted, subjectPaidRejected, htmlPaidRejected } = require("./mailMsg");
 const { objCarritoToReturn } = require("./orderAux");
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -227,11 +227,10 @@ const orderPaidRejected = async (req, res) => {
     try {
         await updateOrderState(external_reference, 5)
         const order = await getCarritoByOrder(external_reference);
-        const html =  htmlPaidRejected(order.obj)
+        const html = htmlPaidRejected(order.obj)
         const email = order.obj.user[0].userEmail
         await emailSender(subjectPaidRejected, html, email)
         res.redirect(`${process.env.URL_SITE_FRONT}`)
-
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -291,20 +290,20 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             } catch (error) {
                 await session.abortTransaction();
                 session.endSession();
-                
+
                 return {
                     ok: false,
                     msg: error
                 }
             }
-        
+
         //ENVIADA
         case 3:
-            await Order.findByIdAndUpdate(orderId, {orderState: 3, orderDeliverDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, { orderState: 3, orderDeliverDate: orderDate });
             break;
         //RECIBIDA
         case 4:
-            await Order.findByIdAndUpdate(orderId, {orderState: 4, orderArrivalDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, { orderState: 4, orderArrivalDate: orderDate });
             break;
         //RECHAZADA
         case 5:
@@ -312,7 +311,7 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             break;
         //CANCELADA
         case 6:
-            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderRejectDate: orderCancelDate});
+            await Order.findByIdAndUpdate(orderId, { orderState: 6, orderRejectDate: orderCancelDate });
             break;
         //PENDIENTE DE APROBACION
         case 7:
