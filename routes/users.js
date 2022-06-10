@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-
+const mongoose = require("mongoose");
 const User = require('../models/Users');
 const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
@@ -8,7 +8,7 @@ const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg'
 const { validateJWT } = require('../middlewares/validateJWT');
 const { sendEmail } = require('../controllers/sendEmail');
 const router = Router();
-
+const ObjectId = mongoose.Types.ObjectId;
 router.post(
     '/new',
     [
@@ -171,9 +171,11 @@ router.get('/allByAdmin/:isAdmin' , async (req, res) => {
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
-        const user = await User.findById(userId).select('_id userEmail userIsActive userIsAdmin userCreationDate userIsGoogle userFirstName userLastName userIsSuperAdmin');
+        const user = await User.findById(userId.toString()).select('_id userEmail userIsActive userIsAdmin userCreationDate userIsGoogle userFirstName userLastName userIsSuperAdmin');
+
         res.status(201).json(user);
     } catch (error) {
+        console.log(error)
         res.status(404).send('No existe un usuario con el id seleccionado')
 
     }
