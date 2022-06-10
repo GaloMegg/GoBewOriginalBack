@@ -272,7 +272,10 @@ const userActivateCta = async (req, res) => {
                 msg: 'Usuario no encontrado.'
             })
         } else {
-             user = await User.findByIdAndUpdate(userId, { userIsActive: true, hash:'' }, { new: true })
+            //  user = await User.findByIdAndUpdate(userId, { userIsActive: true, hash:'' }, { new: true })
+            //TODO: luego de probar volver a vaciar y hash y hacer la prueba completa!!!!
+            
+             user = await User.findByIdAndUpdate(userId, { userIsActive: true }, { new: true })
             res.status(201).json({
                 ok: true,
                 msg: 'Usuario activado.',
