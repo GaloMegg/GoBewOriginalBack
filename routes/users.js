@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const mongoose = require("mongoose");
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta, userAdminResetPassMail, userCheckResetPassword, userChangePassword } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
@@ -117,8 +117,27 @@ router.post(
 router.get('/renew', validateJWT, renewToken);
 
 router.get('/activate/:userId/:hash/:userEmail', userActivateCta);
-// router.get('/admin/resetPass/:userEmail', userResetPassMail);
-// router.get('/admin/checkResetPass/:userId/:hash/:userEmail', userActivateCta);
+router.get('/admin/resetPass/:userEmail', userAdminResetPassMail);
+router.get('/checkResetPass/:userId/:hash/:userEmail', userCheckResetPassword);
+router.put('/changePass',[
+    check('userId').custom(value => {
+        return User.findById(value).then(user => {
+            if (!user) {
+                return Promise.reject(idInvalid);
+            }
+        });
+    }),
+    
+    check('userPassword', 'La contraseña es obligatoria.').not().isEmpty(),
+    check('userPassword', 'La contraseña debe tener al menos 6 caracteres.')
+        .not()
+        .isIn(['123456', 'password1', 'god123'])
+        .withMessage('No es una constraseña segura')
+        .isLength({ min: 6 }),
+    check('userEmail', 'El email es obligatorio.').not().isEmpty(),
+    check('userEmail', 'El email no es válido.').isEmail(),
+    validateFields
+], userChangePassword);
 
 router.get('/all', async (req, res) => {
     try {

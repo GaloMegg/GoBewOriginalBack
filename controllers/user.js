@@ -5,7 +5,7 @@ const Users = require('../models/Users');
 const User = require('../models/Users');
 const { generateJWT, generateHash } = require('../helpers/jwt');
 // const { loginActivateMail } = require('./sendEmail');
-const { htmlNewEmail, subjectNewEmail } = require('./mailMsg');
+const { htmlNewEmail, subjectNewEmail, htmlResetPassword, subjectResetPassword } = require('./mailMsg');
 const { emailSender } = require('./sendEmail');
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -291,6 +291,89 @@ const userActivateCta = async (req, res) => {
     }
 }
 
+
+const userAdminResetPassMail = async (req, res) => {
+    const { userEmail } = req.params;
+    try {
+        const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true, userIsAdmin: true});
+        // console.log(user)
+        if ( !user ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario no encontrado.'
+            })
+        }
+        const hash = await generateHash( userEmail )
+        // console.log(hash)
+        await User.findByIdAndUpdate(user._id, { hash: hash }, { new: true })
+
+
+        
+        const link = `${process.env.URL_SITE_ADMIN}reset/${user._id}/${hash}/${userEmail}`
+        // console.log(link);
+        const html = htmlResetPassword(user.userFirstName,  link)
+        // console.log(html);
+        await emailSender(subjectResetPassword, html, userEmail)
+        
+        res.status(201).json({
+            ok: true,
+            msg: 'Correo de restablecimiento de contraseña enviado.'
+        })
+        
+    } catch (error) {
+        // console.log(error);
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
+const userCheckResetPassword = async (req, res) => {
+    const { userId, hash, userEmail } = req.params;
+    let user;
+    try {
+         user = await User.findOne({_id: ObjectId(userId), hash: hash, userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' }});
+        if (!user) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario no encontrado.'
+            })
+        } else {
+            // user = await User.findByIdAndUpdate(userId, { userIsActive: true }, { new: true })
+            res.status(201).json({
+                ok: true,
+                msg: 'Usuario habilitado para cambiar contraseña.',
+                user
+            })
+        }
+    } 
+    catch (error) {
+        res.json({
+            ok: false,
+            msg: 'El link para modificar la contraseña ha expirado. Por favor, vuelva a pedir un correo de restablecimiento de contraseña.'
+        })
+    }    
+}
+
+
+const  userChangePassword = async (req, res) => {
+    const { userId, userEmail, userPassword } = req.body
+    const user = await User.findOneAndUpdate({_id: ObjectId(userId), userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' }}, { userPassword: userPassword }, { new: true })
+    if (!user) {
+        return res.status(400).json({
+            ok: false,
+            msg: 'Usuario no encontrado.'
+        })
+    } else {
+        res.status(201).json({
+            ok: true,
+            msg: 'Contraseña actualizada.',
+            user})
+    }
+}
+
+
 module.exports = {
     createUser,
     updateUser,
@@ -299,5 +382,8 @@ module.exports = {
     loginUserAdmin,
     renewToken,
     updateUserActiveState,
-    userActivateCta
+    userActivateCta,
+    userAdminResetPassMail,
+    userCheckResetPassword,
+    userChangePassword
 }
