@@ -293,7 +293,7 @@ const userActivateCta = async (req, res) => {
 
 
 const userAdminResetPassMail = async (req, res) => {
-    const { userEmail } = req.params;
+    const { userEmail } = req.body;
     try {
         const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true, userIsAdmin: true});
         // console.log(user)

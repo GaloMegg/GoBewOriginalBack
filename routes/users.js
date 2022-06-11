@@ -117,7 +117,7 @@ router.post(
 router.get('/renew', validateJWT, renewToken);
 
 router.get('/activate/:userId/:hash/:userEmail', userActivateCta);
-router.get('/admin/resetPass/:userEmail', userAdminResetPassMail);
+router.get('/admin/resetPass', userAdminResetPassMail);
 router.get('/checkResetPass/:userId/:hash/:userEmail', userCheckResetPassword);
 router.put('/changePass',[
     check('userId').custom(value => {
