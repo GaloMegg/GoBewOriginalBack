@@ -11,9 +11,9 @@ const createProduct = async (req, res) => {
             product: newProduct
         })
     } catch (error) {
-        res.json({
+        res.status(500).json({
             ok:false,
-            msg: error
+            msg: 'Ya existe un producto con ese nombre'
         })
     }
 }
@@ -33,7 +33,7 @@ const updateProduct = async (req, res) => {
         res.status(500).json({
             ok:false,
             // msg: error
-            msg: 'Ya existe un producto con ese nombre'
+            msg: 'Ocurrió un error, el producto no pudos ser modificado.'
         })
     }
 }
