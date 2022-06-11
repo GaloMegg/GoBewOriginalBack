@@ -504,6 +504,81 @@ const getAllOrders = async (req, res) => {
     }
 }
 
+const getAllOrdersByUser = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const order = await Order
+
+        .aggregate([
+            {$match: {userId: ObjectId(userId)}},
+            {$lookup: {
+                from: 'orderproducts',
+                localField:  '_id',
+                foreignField:'orderId',
+                as: 'orderproducts'            
+            }},
+            {
+                $unwind: {
+                  path: "$orderproducts",
+                  preserveNullAndEmptyArrays: true
+                }
+            },
+            
+            {$lookup: {
+                from: 'products',                
+                localField:  'orderproducts.productId',
+                foreignField:'_id',
+                as: 'orderproducts.products'            
+            }},
+            {
+                $group: {
+                    _id : "$_id",
+                    orderState: {$first: "$orderState"},
+                    orderTotal: {$first: "$orderTotal"},
+                    orderCreationDate: {$first: "$orderCreationDate"},
+                    orderAceptDate: {$first: "$orderAceptDate"},
+                    orderDeliverDate: {$first: "$orderDeliverDate"},
+                    orderCancelDate: {$first: "$orderCancelDate"},
+                    orderproducts: {$push: "$orderproducts" }
+                }
+            },
+            
+            {
+              "$project": {
+                  "_id": 1,
+                  "orderState": 1,
+                  "orderTotal": 1,
+                    "orderCreationDate": 1,
+                    "orderAceptDate": 1,
+                    "orderDeliverDate": 1,
+                    "orderCancelDate": 1,
+                    "orderproducts._id": 1,
+                    "orderproducts.orderId": 1,
+                    "orderproducts.productId": 1,
+                    "orderproducts.productCant": 1,
+                    "orderproducts.productPrice": 1,
+                    "orderproducts.products._id": 1,
+                    "orderproducts.products.productName": 1,
+              }
+            }
+
+        ])
+
+        if(!order){
+            throw {
+                ok: false,
+                msg: 'No hay ordenes de compra ingresadas'
+            }
+        }
+        res.json(order)
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+    }
+}
+
 const updateShippingId = async (req, res) => {
     const { orderId, shippingAddressId } = req.body;
     // console.log(orderId, shippingAddressId)
@@ -535,5 +610,6 @@ module.exports = {
     updateShippingId,
     orderDelivered,
     orderArrived,
-    orderCancelled
+    orderCancelled,
+    getAllOrdersByUser
 }
