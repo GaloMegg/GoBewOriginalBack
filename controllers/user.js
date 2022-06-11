@@ -324,7 +324,7 @@ const userAdminResetPassMail = async (req, res) => {
         // console.log(error);
         res.status(404).json({
             ok: false,
-            msg: error
+            msg: 'Ha ocurrido un error. Por favor, intente nuevamente.'
         })
     }
 }
@@ -335,7 +335,7 @@ const userCheckResetPassword = async (req, res) => {
     try {
          user = await User.findOne({_id: ObjectId(userId), hash: hash, userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' }});
         if (!user) {
-            return res.status(400).json({
+            return res.status(200).json({
                 ok: false,
                 msg: 'Usuario no encontrado.'
             })
@@ -359,17 +359,37 @@ const userCheckResetPassword = async (req, res) => {
 
 const  userChangePassword = async (req, res) => {
     const { userId, userEmail, userPassword } = req.body
-    const user = await User.findOneAndUpdate({_id: ObjectId(userId), userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' }}, { userPassword: userPassword }, { new: true })
-    if (!user) {
-        return res.status(400).json({
+
+    try {
+        const bcrypt = require('bcryptjs');
+        const salt = bcrypt.genSaltSync(10);
+        const userPasswordCrypt = bcrypt.hashSync(userPassword, salt);
+        const user = await User.findOneAndUpdate({_id: ObjectId(userId), userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' }}, { userPassword: userPasswordCrypt }, { new: true })
+        if (!user) {
+            return res.status(201).json({
+                ok: false,
+                msg: 'Usuario no encontrado.'
+            })
+        } else {
+            res.status(201).json({
+                ok: true,
+                msg: 'Contraseña actualizada.',
+                user: {
+                    userFirstName: user.userFirstName,
+                    userEmail: user.userEmail,
+                    userLastName: user.userLastName,
+                    userIsAdmin: user.userIsAdmin,
+                    userIsActive: user.userIsActive,
+                    userIsSuperAdmin: user.userIsSuperAdmin,
+                    userId: user._id
+                }})
+        }
+        
+    } catch (error) {
+        res.status(404).json({
             ok: false,
-            msg: 'Usuario no encontrado.'
+            msg: 'Ha ocurrido un error. Por favor, intente nuevamente.'
         })
-    } else {
-        res.status(201).json({
-            ok: true,
-            msg: 'Contraseña actualizada.',
-            user})
     }
 }
 

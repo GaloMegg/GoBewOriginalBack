@@ -22,8 +22,8 @@ const emailSender = async (subject, html, email ) =>{
         }
         await transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.log("email no enviado")
-                console.log(error)
+                // console.log("email no enviado")
+                // console.log(error)
                 return resMail= {
                     ok: false,
                     msg: "hubo un error",
