@@ -117,6 +117,8 @@ router.post(
 router.get('/renew', validateJWT, renewToken);
 
 router.get('/activate/:userId/:hash/:userEmail', userActivateCta);
+// router.get('/admin/resetPass/:userEmail', userResetPassMail);
+// router.get('/admin/checkResetPass/:userId/:hash/:userEmail', userActivateCta);
 
 router.get('/all', async (req, res) => {
     try {
@@ -171,11 +173,12 @@ router.get('/allByAdmin/:isAdmin' , async (req, res) => {
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
+        // console.log(userId)
         const user = await User.findById(userId.toString()).select('_id userEmail userIsActive userIsAdmin userCreationDate userIsGoogle userFirstName userLastName userIsSuperAdmin');
 
         res.status(201).json(user);
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(404).send('No existe un usuario con el id seleccionado')
 
     }
@@ -183,7 +186,7 @@ router.get('/:userId', async (req, res) => {
 
 router.get('/byName/:userName', async (req, res) => {
     const { userName } = req.params;
-    console.log(userName)
+    // console.log(userName)
     try {
         // const user = await User.find({ userFirstName: { $regex: new RegExp(`^${userName}$`, 'i') } });
         const user = await User.find({

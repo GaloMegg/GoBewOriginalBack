@@ -210,7 +210,7 @@ router.get('/:productId', async (req, res) => {
             productList
         })
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({
             ok: false,
             msg: 'Error'
