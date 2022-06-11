@@ -8,6 +8,17 @@ const subjectNewPassword = 'Cambio de contraseña en GoBew'
 const subjectNewEmail = 'Confirmación de Email'
 const subjectOrderDelivered = 'Tu pedido en GoBew ha sido enviado!'
 const subjectOrderArrived = 'Recibiste tu pedido, qué lo disfrutes!'
+const subjectResetPassword = 'GoBew - Recuperación de contraseña'
+
+const htmlResetPassword =( userFirstName,  link) =>{ 
+    const html= `<p><span>Hola ${userFirstName},</span></p>
+    <span>Recibimos un pedido para cambiar la contraseña de GoBew<br /><br /></span>
+    <span>Hacé click <a href="${link}">aquí</a> para modificarla.<br /><br /></span>
+    <span>Háganos saber si tiene alguna pregunta, solicitud o comentarios generales simplemente respondiendo a este correo electrónico.</span>
+    <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>`
+
+    return html;
+}
 const htmlNewEmail =({userEmail, userFirstName,  link}) =>{ 
     const html= `<p><span>Hola ${userFirstName},</span></p>
     <span>Gracias por registrarte en GoBew! Estamos encantados de tenerte a bordo y trataremos de ayudarte lo máximo posible.
@@ -189,4 +200,6 @@ module.exports = {
     htmlOrderArrived,
     subjectOrderArrived,
     htmlOrderCancelled,
+    subjectResetPassword,
+    htmlResetPassword
 }
