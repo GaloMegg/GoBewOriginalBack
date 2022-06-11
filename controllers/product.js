@@ -30,9 +30,10 @@ const updateProduct = async (req, res) => {
             product
         })
     } catch (error) {
-        res.json({
+        res.status(500).json({
             ok:false,
-            msg: error
+            // msg: error
+            msg: 'Ya existe un producto con ese nombre'
         })
     }
 }
