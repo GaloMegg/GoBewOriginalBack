@@ -9,7 +9,9 @@ const imageRouter = require('./routes/images')
 const faqRouter = require('./routes/faqs')
 const addressRouter = require('./routes/address')
 const reviewsRouter = require('./routes/reviews')
-//TODO/users instalar morgan
+const wishListRouter = require('./routes/wishList')
+
+
 require('dotenv').config();
 //Crear el servidor de express
 const app = express();
@@ -36,7 +38,7 @@ app.use('/payments', payments)
 app.use('/address', addressRouter)
 app.use('/faqs', faqRouter)
 app.use('/reviews', faqRouter)
-
+app.use('/wishList', wishListRouter)	
 app.listen(process.env.PORT, () => {
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`);
 });
