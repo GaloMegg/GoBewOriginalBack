@@ -5,9 +5,9 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const { 
-        createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, 
-        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId, orderDelivered, orderCancelled, orderArrived
+const {
+    createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid,
+    orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId, orderDelivered, orderCancelled, orderArrived
 } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
@@ -79,19 +79,19 @@ router.post('/pay', async (req, res) => {
         res.json({ global: response.body.id })
     })
 })
-    //Datos que envía mercadopago a las rutas /succes y /failure y /pending
-    //     collection_id: '1251735767',
-    //     collection_status: 'approved',
-    // !   payment_id: '1251735767',
-    // !   status: 'approved',
-    // !   external_reference: '1234567asdasdasd89',
-    //     payment_type: 'credit_card',
-    //     merchant_order_id: '4891524835',
-    //     preference_id: '1135343864-853663a1-142c-4824-901b-51fad1f0c8c8',
-    //     site_id: 'MLA',
-    //     processing_mode: 'aggregator',
-    //     merchant_account_id: 'null'
-    //   }
+//Datos que envía mercadopago a las rutas /succes y /failure y /pending
+//     collection_id: '1251735767',
+//     collection_status: 'approved',
+// !   payment_id: '1251735767',
+// !   status: 'approved',
+// !   external_reference: '1234567asdasdasd89',
+//     payment_type: 'credit_card',
+//     merchant_order_id: '4891524835',
+//     preference_id: '1135343864-853663a1-142c-4824-901b-51fad1f0c8c8',
+//     site_id: 'MLA',
+//     processing_mode: 'aggregator',
+//     merchant_account_id: 'null'
+//   }
 
 router.get('/success',
     [
@@ -105,26 +105,26 @@ router.get('/success',
         }),
         validateFields
     ],
-    orderPaid 
+    orderPaid
 )
 
 //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
 //! buscar en la base de datos la orden con ese ID (External reference) y en la RESPUESTA devolver a 
 //*res.redirect(FRONT_URL/compra fallida)
-router.get('/failure', 
-[
-    check('external_reference').not().isEmpty(),
-    check('external_reference').custom(value => {
-        
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields
-],
-orderPaidRejected
+router.get('/failure',
+    [
+        check('external_reference').not().isEmpty(),
+        check('external_reference').custom(value => {
+
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderPaidRejected
 )
 router.get('/pending',
     //? por query recibo el id el status la EXTERNAL REFERENCE que va a ser el ID de la orden en la base de datos y la merchant order ID
@@ -142,7 +142,7 @@ router.get('/pending',
         validateFields
     ],
     orderPaidPending
-    )
+)
 
 /**
 {
@@ -252,110 +252,110 @@ router.put('/order/updatecarrito',
 )
 
 router.get('/entered',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields,
-    validateJWT
-],
-orderEntered
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields,
+        validateJWT
+    ],
+    orderEntered
 )
 router.get('/delivered',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields
-],
-orderDelivered
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderDelivered
 )
 router.get('/arrived',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields
-],
-orderArrived
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderArrived
 )
 router.get('/cancelled',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields
-],
-orderCancelled
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    orderCancelled
 )
 //Solamente se pueden eliminar carritos (orderState: 0)
 router.delete('/order/:orderId',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.find({_id: ObjectId(value), orderState:0}).then(order => {
-            if (!order) {
-                return Promise.reject('No hay un carrito de compras con ese id.');
-            }
-        });
-    }),
-    validateFields,
-    validateJWT
-],
-deleteOrder)
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.find({ _id: ObjectId(value), orderState: 0 }).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay un carrito de compras con ese id.');
+                }
+            });
+        }),
+        validateFields,
+        validateJWT
+    ],
+    deleteOrder)
 
 router.get('/order/byId/:orderId',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields,
-    validateJWT
-],
-getOrderById)
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields,
+        validateJWT
+    ],
+    getOrderById)
 
 router.get('/admin/order/byId/:orderId',
-[
-    check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
-    check('orderId').custom(value => {
-        return Order.findById(value).then(order => {
-            if (!order) {
-                return Promise.reject('No hay una orden con ese id.');
-            }
-        });
-    }),
-    validateFields
-],
-getOrderById)
+    [
+        check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
+        check('orderId').custom(value => {
+            return Order.findById(value).then(order => {
+                if (!order) {
+                    return Promise.reject('No hay una orden con ese id.');
+                }
+            });
+        }),
+        validateFields
+    ],
+    getOrderById)
 
 router.get('/order/getAll', getAllOrders)
 
-router.put('/order/updateShipping',[
+router.put('/order/updateShipping', [
     check("orderId", "El id de la orden es obligatorio").not().isEmpty(),
     check('orderId').custom(value => {
         return Order.findById(value).then(order => {
@@ -375,5 +375,5 @@ router.put('/order/updateShipping',[
     validateFields,
     validateJWT
 ],
-updateShippingId)
+    updateShippingId)
 module.exports = router;
