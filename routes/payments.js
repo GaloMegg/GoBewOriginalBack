@@ -5,9 +5,9 @@ const router = Router()
 const mercadopago = require("mercadopago");
 const { validateFields } = require('../middlewares/validateFields');
 const { validateJWT } = require('../middlewares/validateJWT');
-const {
-    createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid,
-    orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId, orderDelivered, orderCancelled, orderArrived
+const { 
+        createOrder, deleteOrder, getCarritoByUser, updateCarrito, orderEntered, orderPaid, 
+        orderPaidRejected, orderPaidPending, getOrderById, getAllOrders, updateShippingId, orderDelivered, orderCancelled, orderArrived, getAllOrdersByUser
 } = require('../controllers/order');
 const User = require('../models/Users');
 const Product = require('../models/Product');
@@ -354,6 +354,20 @@ router.get('/admin/order/byId/:orderId',
     getOrderById)
 
 router.get('/order/getAll', getAllOrders)
+router.get('/order/getAll/ByUser/:userId', 
+[   
+    check("userId", "El id del usuario es obligatorio").not().isEmpty(),
+    check('userId').custom(value => {
+        return User.findById(value.toString()).then(order => {
+            if (!order) {
+                return Promise.reject('No hay una orden con ese id.');
+            }
+        })
+    }),
+    validateFields,
+    validateJWT
+],
+getAllOrdersByUser)
 
 router.put('/order/updateShipping', [
     check("orderId", "El id de la orden es obligatorio").not().isEmpty(),

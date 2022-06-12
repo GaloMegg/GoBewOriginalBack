@@ -1,14 +1,14 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-
+const mongoose = require("mongoose");
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta, userAdminResetPassMail, userCheckResetPassword, userChangePassword } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
 const { sendEmail } = require('../controllers/sendEmail');
 const router = Router();
-
+const ObjectId = mongoose.Types.ObjectId;
 router.post(
     '/new',
     [
@@ -117,6 +117,27 @@ router.post(
 router.get('/renew', validateJWT, renewToken);
 
 router.get('/activate/:userId/:hash/:userEmail', userActivateCta);
+router.post('/admin/resetPass', userAdminResetPassMail);
+router.get('/checkResetPass/:userId/:hash/:userEmail', userCheckResetPassword);
+router.put('/changePass',[
+    check('userId').custom(value => {
+        return User.findById(value).then(user => {
+            if (!user) {
+                return Promise.reject(idInvalid);
+            }
+        });
+    }),
+    
+    check('userPassword', 'La contraseña es obligatoria.').not().isEmpty(),
+    check('userPassword', 'La contraseña debe tener al menos 6 caracteres.')
+        .not()
+        .isIn(['123456', 'password1', 'god123'])
+        .withMessage('No es una constraseña segura')
+        .isLength({ min: 6 }),
+    check('userEmail', 'El email es obligatorio.').not().isEmpty(),
+    check('userEmail', 'El email no es válido.').isEmail(),
+    validateFields
+], userChangePassword);
 
 router.get('/all', async (req, res) => {
     try {
@@ -171,9 +192,12 @@ router.get('/allByAdmin/:isAdmin', async (req, res) => {
 router.get('/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
-        const user = await User.findById(userId).select('_id userEmail userIsActive userIsAdmin userCreationDate userIsGoogle userFirstName userLastName userIsSuperAdmin');
+        // console.log(userId)
+        const user = await User.findById(userId.toString()).select('_id userEmail userIsActive userIsAdmin userCreationDate userIsGoogle userFirstName userLastName userIsSuperAdmin');
+
         res.status(201).json(user);
     } catch (error) {
+        // console.log(error)
         res.status(404).send('No existe un usuario con el id seleccionado')
 
     }
@@ -181,7 +205,7 @@ router.get('/:userId', async (req, res) => {
 
 router.get('/byName/:userName', async (req, res) => {
     const { userName } = req.params;
-    console.log(userName)
+    // console.log(userName)
     try {
         // const user = await User.find({ userFirstName: { $regex: new RegExp(`^${userName}$`, 'i') } });
         const user = await User.find({

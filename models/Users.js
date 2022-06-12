@@ -5,10 +5,6 @@ const UserSchema = new Schema({
         type: String,
         unique: true,
         required: true,
-        //  index: {
-        //      unique: true,
-        //      collation: { locale: 'es', strength: 2 }
-        // }
     },
     userPassword: {
         type: String
@@ -50,13 +46,5 @@ const UserSchema = new Schema({
         default: ""
     }
 })
-// , {
-//     collation: { locale: 'es', strength: 2 }
-//  }
-
-//  index: {
-//     unique: true,
-//     collation: { locale: 'en', strength: 2 }
-//   }
 
 module.exports = model('User', UserSchema)
