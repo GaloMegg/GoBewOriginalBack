@@ -210,7 +210,7 @@ const orderPaid = async (req, res) => {
         const html = htmlPaidAccepted(order.obj)
         const email = order.obj.user[0].userEmail
         await emailSender(subjectPaidAccepted, html, email)
-        res.redirect(`${process.env.URL_SITE_FRONT}`)
+        res.redirect(`${process.env.URL_SITE_FRONT}order/${external_reference}`)
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -229,7 +229,7 @@ const orderPaidRejected = async (req, res) => {
         const html = htmlPaidRejected(order.obj)
         const email = order.obj.user[0].userEmail
         await emailSender(subjectPaidRejected, html, email)
-        res.redirect(`${process.env.URL_SITE_FRONT}`)
+        res.redirect(`${process.env.URL_SITE_FRONT}order/${external_reference}`)
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -244,7 +244,7 @@ const orderPaidPending = async (req, res) => {
     try {
         await updateOrderState(external_reference, 7)
 
-        res.redirect(`${process.env.URL_SITE_FRONT}`)
+        res.redirect(`${process.env.URL_SITE_FRONT}order/${external_reference}`)
     } catch (error) {
         res.status(404).json({
             ok: false,
@@ -519,62 +519,66 @@ const getAllOrdersByUser = async (req, res) => {
     try {
         const order = await Order
 
-        .aggregate([
-            {$match: {userId: ObjectId(userId)}},
-            {$lookup: {
-                from: 'orderproducts',
-                localField:  '_id',
-                foreignField:'orderId',
-                as: 'orderproducts'            
-            }},
-            {
-                $unwind: {
-                  path: "$orderproducts",
-                  preserveNullAndEmptyArrays: true
-                }
-            },
-            
-            {$lookup: {
-                from: 'products',                
-                localField:  'orderproducts.productId',
-                foreignField:'_id',
-                as: 'orderproducts.products'            
-            }},
-            {
-                $group: {
-                    _id : "$_id",
-                    orderState: {$first: "$orderState"},
-                    orderTotal: {$first: "$orderTotal"},
-                    orderCreationDate: {$first: "$orderCreationDate"},
-                    orderAceptDate: {$first: "$orderAceptDate"},
-                    orderDeliverDate: {$first: "$orderDeliverDate"},
-                    orderCancelDate: {$first: "$orderCancelDate"},
-                    orderproducts: {$push: "$orderproducts" }
-                }
-            },
-            
-            {
-              "$project": {
-                  "_id": 1,
-                  "orderState": 1,
-                  "orderTotal": 1,
-                    "orderCreationDate": 1,
-                    "orderAceptDate": 1,
-                    "orderDeliverDate": 1,
-                    "orderCancelDate": 1,
-                    "orderproducts._id": 1,
-                    "orderproducts.orderId": 1,
-                    "orderproducts.productId": 1,
-                    "orderproducts.productCant": 1,
-                    "orderproducts.productPrice": 1,
-                    "orderproducts.products._id": 1,
-                    "orderproducts.products.productName": 1,
-              }
-            }
+            .aggregate([
+                { $match: { userId: ObjectId(userId) } },
+                {
+                    $lookup: {
+                        from: 'orderproducts',
+                        localField: '_id',
+                        foreignField: 'orderId',
+                        as: 'orderproducts'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$orderproducts",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
 
-        ])
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'orderproducts.productId',
+                        foreignField: '_id',
+                        as: 'orderproducts.products'
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        orderState: { $first: "$orderState" },
+                        orderTotal: { $first: "$orderTotal" },
+                        orderCreationDate: { $first: "$orderCreationDate" },
+                        orderAceptDate: { $first: "$orderAceptDate" },
+                        orderDeliverDate: { $first: "$orderDeliverDate" },
+                        orderCancelDate: { $first: "$orderCancelDate" },
+                        orderproducts: { $push: "$orderproducts" }
+                    }
+                },
 
-        if(!order){
+                {
+                    "$project": {
+                        "_id": 1,
+                        "orderState": 1,
+                        "orderTotal": 1,
+                        "orderCreationDate": 1,
+                        "orderAceptDate": 1,
+                        "orderDeliverDate": 1,
+                        "orderCancelDate": 1,
+                        "orderproducts._id": 1,
+                        "orderproducts.orderId": 1,
+                        "orderproducts.productId": 1,
+                        "orderproducts.productCant": 1,
+                        "orderproducts.productPrice": 1,
+                        "orderproducts.products._id": 1,
+                        "orderproducts.products.productName": 1,
+                    }
+                }
+
+            ])
+
+        if (!order) {
             throw {
                 ok: false,
                 msg: 'No hay ordenes de compra ingresadas'
