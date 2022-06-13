@@ -59,6 +59,7 @@ const getWishListAllByUser = async (req, res) => {
                 foreignField:'_id',
                 as: 'product'            
             }},
+            {$unwind: '$product'},
             {
                 $lookup: {
                     from: 'images',
@@ -67,6 +68,12 @@ const getWishListAllByUser = async (req, res) => {
                     as: 'images'
                 }
             },
+            // {$unwind: '$images'},
+            // {$group: {
+            //     _id: '$productId',
+            //     product: { $first: '$product' },
+            //     images: { $first: '$images' }
+            // }},
             {
                 "$project": {
                     "_id": 1,
@@ -75,6 +82,7 @@ const getWishListAllByUser = async (req, res) => {
                     "product.productDescription": 1,
                     "product.productPrice": 1,
                     "product.productStock": 1,
+                    "images.productId": 1,
                     "images.imageName": 1,
                     "images.imageIsPrimary": 1,
                 }
