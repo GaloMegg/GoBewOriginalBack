@@ -361,28 +361,25 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
 
         //ENVIADA
         case 3:
-            await Order.findByIdAndUpdate(orderId, {orderState: 3, orderDeliverDate: date});
+            await Order.findByIdAndUpdate(orderId, {orderState: 3, orderDeliverDate: date}, {new: true});
             break;
         //RECIBIDA
         case 4:
-            await Order.findByIdAndUpdate(orderId, {orderState: 4, orderArrivalDate: date});
+            await Order.findByIdAndUpdate(orderId, {orderState: 4, orderArrivalDate: date}, {new: true});
             break;
         //RECHAZADA
         case 5:
-            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: date});
-
+            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: date}, {new: true});
             break;
         //CANCELADA
         case 6:
             // console.log(6)
-
-            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: date});
+            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: date}, {new: true});
             // console.log(7)
             break;
         //PENDIENTE DE APROBACION
         case 7:
-
-            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: date});
+            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: date}, {new: true});
             break;
         default:
             break;
