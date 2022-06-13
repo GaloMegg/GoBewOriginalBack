@@ -10,7 +10,7 @@ const faqRouter = require('./routes/faqs')
 const addressRouter = require('./routes/address')
 const reviewsRouter = require('./routes/reviews')
 const wishListRouter = require('./routes/wishList')
-
+const companyRouter = require('./routes/company')
 
 require('dotenv').config();
 //Crear el servidor de express
@@ -39,6 +39,7 @@ app.use('/address', addressRouter)
 app.use('/faqs', faqRouter)
 app.use('/reviews', faqRouter)
 app.use('/wishList', wishListRouter)	
+app.use('/company', companyRouter)
 app.listen(process.env.PORT, () => {
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`);
 });
