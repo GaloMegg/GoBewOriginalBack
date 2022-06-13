@@ -331,7 +331,7 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
     switch (orderState) {
         //INGRESADA
         case 1:
-            await Order.findByIdAndUpdate(orderId, { orderState: 1, orderCreationDate: orderDate });
+            await Order.findByIdAndUpdate(orderId, { orderState: 1, orderCreationDate: date });
             break;
         //PAGO ACEPTADO
         case 2:

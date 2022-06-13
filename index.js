@@ -37,7 +37,7 @@ app.use('/categories', categoryRouter)
 app.use('/payments', payments)
 app.use('/address', addressRouter)
 app.use('/faqs', faqRouter)
-app.use('/reviews', faqRouter)
+app.use('/reviews', reviewsRouter)
 app.use('/wishList', wishListRouter)	
 app.use('/company', companyRouter)
 app.listen(process.env.PORT, () => {

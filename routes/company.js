@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { getCompany, createCompany } = require("../controllers/company");
+const { getCompany, createCompany, updateCompany } = require("../controllers/company");
 
 const router = Router();
 

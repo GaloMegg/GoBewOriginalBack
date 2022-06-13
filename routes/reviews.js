@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
-const { createReview, listProductReviews } = require("../controllers/reviews");
+const { createReview, listProductReviews, listOrderReviews } = require("../controllers/reviews");
 const { validateFields } = require("../middlewares/validateFields");
 const { validateJWT } = require("../middlewares/validateJWT");
 const User = require("../models/Users");
@@ -26,6 +26,14 @@ router.post('/',
             }
         });
     }),
+    check('orderId', "El id del pedido es obligatorio").not().isEmpty(),
+    check('orderId').custom(value => {
+        return Order.findById(value).then(order => {
+            if (!order) {
+            return Promise.reject('Ya hay un pedido con ese id.');
+            }
+        });
+    }),
     check('reviewStars', "La calificación es obligatoria").not().isEmpty(),
     check('reviewStars', "La calificación debe ser un número").isNumeric(),
     check('reviewComment', "El comentario es obligatorio").not().isEmpty()
@@ -36,5 +44,6 @@ createReview)
 
 router.get('/byProduct/:productId', listProductReviews)
 
+router.get('/byOrder/:orderId', listOrderReviews)
 
 module.exports = router;
