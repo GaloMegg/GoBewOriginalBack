@@ -32,6 +32,25 @@ const createUserAddress = async (req, res) => {
     }
 }
 
+const updateUserAddress = async (req, res) => {
+    const { addressId } = req.params; 
+    const { addressComment,addressStreet, addressNumber, addressFloor, addressFlat, addressCity, addressZipCode, addressProvince } = req.body;
+    const addressIsShipping = true;
+    const addressIsBilling = true;
+    try {
+        const address = await Address.findByIdAndUpdate(addressId, { addressComment, addressIsShipping, addressIsBilling, addressStreet, addressNumber, addressFloor, addressFlat, addressCity, addressZipCode, addressProvince }, { new: true });
+        res.status(201).json({
+            ok: true,
+            address
+        })
+        
+    } catch (error) {
+        res.status(501).json({
+            ok: false,
+            msg: 'No se pudo acutalizar la dirección.'
+        });
+    }
+}
 
 const addressListByUserId = async (req, res) => {
     const { userId } = req.params;
@@ -70,5 +89,6 @@ const addressGetByOrderId = async (req, res) => {
 module.exports = {
     createUserAddress,
     addressListByUserId,
-    addressGetByOrderId
+    addressGetByOrderId,
+    updateUserAddress
 }
