@@ -58,8 +58,26 @@ const deleteImage =async (req, res) => {
     }
 }
 
+const getImagesByProduct =async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const imgs = await Image.find({productId});
+        res.status(201).json({
+            err: true,
+            imgs
+        })
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            err: 'No se encontraron imágens'
+        })
+    }
+}
+
+
 module.exports = {
     updateImage,
     createImage,
-    deleteImage
+    deleteImage,
+    getImagesByProduct
 }
