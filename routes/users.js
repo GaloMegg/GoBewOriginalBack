@@ -16,8 +16,8 @@ router.post(
         check('userEmail', 'El email no es válido.').isEmail(),
         check('userEmail').custom(value => {
             // console.log(1,value)
-            return User.find({ userEmail: { $regex: new RegExp('^'+value+'$', "i")} }).then(user => {
-            // console.log(1,user)                
+            return User.find({ userEmail: { $regex: new RegExp('^' + value + '$', "i") } }).then(user => {
+                // console.log(1,user)                
                 if (user.length > 0) {
                     return Promise.reject('Ya hay un usuario con ese email.');
                 }
@@ -155,9 +155,9 @@ router.get('/all', async (req, res) => {
     }
 
 })
-router.get('/allByActive/:isActive' , async (req, res) => {
+router.get('/allByActive/:isActive', async (req, res) => {
     const { isActive } = req.params;
-    const userIsActive = isActive === 'true' ? true :  false;
+    const userIsActive = isActive === 'true' ? true : false;
     try {
         const users = await User.find({ userIsActive });
         res.json({
@@ -172,9 +172,9 @@ router.get('/allByActive/:isActive' , async (req, res) => {
     }
 
 })
-router.get('/allByAdmin/:isAdmin' , async (req, res) => {
+router.get('/allByAdmin/:isAdmin', async (req, res) => {
     const { isAdmin } = req.params;
-    const userIsAdmin = isAdmin === 'true' ? true :  false;
+    const userIsAdmin = isAdmin === 'true' ? true : false;
     try {
         const users = await User.find({ userIsAdmin });
         res.json({
@@ -211,10 +211,10 @@ router.get('/byName/:userName', async (req, res) => {
         // const user = await User.find({ userFirstName: { $regex: new RegExp(`^${userName}$`, 'i') } });
         const user = await User.find({
             $or: [
-              { 'userFirstName':  { $regex: '.*' + userName + '.*', '$options': 'i' } },
-              { 'userLastName': { $regex: '.*' + userName + '.*', '$options': 'i' }}
+                { 'userFirstName': { $regex: '.*' + userName + '.*', '$options': 'i' } },
+                { 'userLastName': { $regex: '.*' + userName + '.*', '$options': 'i' } }
             ]
-          });
+        });
         res.status(201).json(user);
 
     } catch (error) {
