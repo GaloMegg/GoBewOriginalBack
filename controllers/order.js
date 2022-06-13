@@ -327,7 +327,8 @@ const orderCancelled = async (req, res) => {
 // 7 pendiente de aprobación
 const updateOrderState = async (orderId, orderState, payment_id = null, payment_type = null) => {
     const date = new Date();
-    const orderDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+    let session;
+    // const orderDate = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
     switch (orderState) {
         //INGRESADA
         case 1:
@@ -335,12 +336,12 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             break;
         //PAGO ACEPTADO
         case 2:
-            const session = await Order.startSession();
+            session = await Order.startSession();
             session.startTransaction();
             try {
                 const opts = { session };
 
-                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: date, payment_id, payment_type}, opts);
+                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderCreationDate: date, orderAceptDate: date, payment_id, payment_type}, opts);
                 const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
                 await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
 
@@ -369,17 +370,38 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             break;
         //RECHAZADA
         case 5:
-            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: date}, {new: true});
+            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: date, orderCreationDate: date}, {new: true});
             break;
         //CANCELADA
         case 6:
+            session = await Order.startSession();
+            session.startTransaction();
             // console.log(6)
-            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: date}, {new: true});
-            // console.log(7)
-            break;
+            try {
+                const opts = { session };
+
+                await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: date}, {new: true});
+                const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
+                await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:+Number(item.productCant)}}, {new: true, opts})))
+
+                await session.commitTransaction();
+                session.endSession();
+                return {
+                    ok: true
+                }
+            } catch (error) {
+                await session.abortTransaction();
+                session.endSession();
+
+                return {
+                    ok: false,
+                    msg: error
+                }
+            }
+            
         //PENDIENTE DE APROBACION
         case 7:
-            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: date}, {new: true});
+            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: date, orderCreationDate: date}, {new: true});
             break;
         default:
             break;
