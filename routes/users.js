@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const mongoose = require("mongoose");
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta, userAdminResetPassMail, userCheckResetPassword, userChangePassword } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta, userAdminResetPassMail, userResetPassMail, userCheckResetPassword, userChangePassword } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
@@ -118,6 +118,7 @@ router.get('/renew', validateJWT, renewToken);
 
 router.get('/activate/:userId/:hash/:userEmail', userActivateCta);
 router.post('/admin/resetPass', userAdminResetPassMail);
+router.post('/resetPass', userResetPassMail);
 router.get('/checkResetPass/:userId/:hash/:userEmail', userCheckResetPassword);
 router.put('/changePass',[
     check('userId').custom(value => {

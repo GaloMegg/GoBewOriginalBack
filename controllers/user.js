@@ -328,6 +328,42 @@ const userAdminResetPassMail = async (req, res) => {
         })
     }
 }
+const userResetPassMail = async (req, res) => {
+    const { userEmail } = req.body;
+    try {
+        const user = await Users.findOne({userEmail:{ $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsActive:true});
+        // console.log(user)
+        if ( !user ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Usuario no encontrado.'
+            })
+        }
+        const hash = await generateHash( userEmail )
+        // console.log(hash)
+        await User.findByIdAndUpdate(user._id, { hash: hash }, { new: true })
+
+
+        
+        const link = `${process.env.URL_SITE_FRONT}reset/${user._id}/${hash}/${userEmail}`
+        // console.log(link);
+        const html = htmlResetPassword(user.userFirstName,  link)
+        // console.log(html);
+        await emailSender(subjectResetPassword, html, userEmail)
+        
+        res.status(201).json({
+            ok: true,
+            msg: 'Correo de restablecimiento de contraseña enviado.'
+        })
+        
+    } catch (error) {
+        // console.log(error);
+        res.status(404).json({
+            ok: false,
+            msg: 'Ha ocurrido un error. Por favor, intente nuevamente.'
+        })
+    }
+}
 
 const userCheckResetPassword = async (req, res) => {
     const { userId, hash, userEmail } = req.params;
@@ -405,5 +441,6 @@ module.exports = {
     userActivateCta,
     userAdminResetPassMail,
     userCheckResetPassword,
-    userChangePassword
+    userChangePassword,
+    userResetPassMail
 }
