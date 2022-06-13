@@ -334,7 +334,7 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
             session.startTransaction();
             try {
                 const opts = { session };
-                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: orderDate, payment_id, payment_type}, opts);
+                await Order.findByIdAndUpdate(orderId, {orderState: 2, orderAceptDate: date, payment_id, payment_type}, opts);
                 const orderProducts = await OrderProduct.find({orderId: ObjectId(orderId)},null, opts);
                 await Promise.all(orderProducts.map(item =>Product.findByIdAndUpdate(item.productId, {"$inc":{productStock:-Number(item.productCant)}}, {new: true, opts})))
                 await session.commitTransaction();
@@ -354,25 +354,25 @@ const updateOrderState = async (orderId, orderState, payment_id = null, payment_
         
         //ENVIADA
         case 3:
-            await Order.findByIdAndUpdate(orderId, {orderState: 3, orderDeliverDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, {orderState: 3, orderDeliverDate: date});
             break;
         //RECIBIDA
         case 4:
-            await Order.findByIdAndUpdate(orderId, {orderState: 4, orderArrivalDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, {orderState: 4, orderArrivalDate: date});
             break;
         //RECHAZADA
         case 5:
-            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, {orderState: 5, orderRejectDate: date});
             break;
         //CANCELADA
         case 6:
             // console.log(6)
-            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, {orderState: 6, orderCancelDate: date});
             // console.log(7)
             break;
         //PENDIENTE DE APROBACION
         case 7:
-            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: orderDate});
+            await Order.findByIdAndUpdate(orderId, {orderState: 7, orderPendingDate: date});
             break;
         default:
             break;
