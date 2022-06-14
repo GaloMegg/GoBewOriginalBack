@@ -429,6 +429,28 @@ const  userChangePassword = async (req, res) => {
     }
 }
 
+const userIsGoogleByMail = async (req, res) => {
+    const { userEmail } = req.params;
+    try {
+        const user = await User.findOne({userEmail: { $regex: new RegExp(`^${userEmail}$`), $options: 'i' }, userIsGoogle: true});
+        if (!user) {
+            return res.status(200).json({
+                ok: true,
+                userIsGoogle: false
+            })
+        } else {
+            res.status(201).json({
+                ok: true,
+                userIsGoogle: true
+            })
+        }
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: 'Ha ocurrido un error. Por favor, intente nuevamente.'
+        })
+    }
+}
 
 module.exports = {
     createUser,
@@ -442,5 +464,6 @@ module.exports = {
     userAdminResetPassMail,
     userCheckResetPassword,
     userChangePassword,
-    userResetPassMail
+    userResetPassMail,
+    userIsGoogleByMail
 }
