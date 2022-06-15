@@ -96,7 +96,7 @@ const htmlOrderArrived = (obj) =>{
     <table>${elements}</table>
     <p>Por un total de $ ${obj.orderTotal}</p>
     <p>Esperamos que lo disfrutes,<br />Gobew team</p></p>
-    <p>Dejanos tu reseña en <a href='${process.env.URL_SITE_FRONT}/order/${obj.orderId}'>aquí</a></p>
+    <p>Dejanos tu reseña en <a href='${process.env.URL_SITE_FRONT}order/${obj.orderId}'>aquí</a></p>
     <p><span>Saludos cordiales,</span><br /><span>GoBew team</span></p>
     `
     // console.log(html)
