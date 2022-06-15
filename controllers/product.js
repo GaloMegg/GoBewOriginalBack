@@ -11,17 +11,18 @@ const createProduct = async (req, res) => {
             product: newProduct
         })
     } catch (error) {
-        res.json({
+        res.status(500).json({
             ok:false,
-            msg: error
+            msg: 'Ya existe un producto con ese nombre'
         })
     }
 }
 const updateProduct = async (req, res) => {
+    // console.log('entro a updateProduct')
     const { productId, productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories } = req.body;
     try {
-    
         const productToUpdate={productName, productIsActive, productDescription, productPrice, productStock, productIsHighLight, productCategories}    
+        // console.log(productToUpdate)
         const product = await Product.findByIdAndUpdate(productId, productToUpdate, { new: true })
 
         res.status(201).json({
@@ -29,9 +30,10 @@ const updateProduct = async (req, res) => {
             product
         })
     } catch (error) {
-        res.json({
+        res.status(500).json({
             ok:false,
-            msg: error
+            // msg: error
+            msg: 'Ocurrió un error, el producto no pudos ser modificado.'
         })
     }
 }

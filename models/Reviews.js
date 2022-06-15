@@ -11,6 +11,11 @@ const reviewSchema = new Schema({
         ref: 'User',
         required: true
     },
+    orderId: {
+        type: Schema.ObjectId,
+        ref: 'Order',
+        required: true
+    },
     reviewStars: {
         type: Number,
         required: true

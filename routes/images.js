@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { updateImage, createImage, deleteImage } = require('../controllers/image');
+const { updateImage, createImage, deleteImage, getImagesByProduct } = require('../controllers/image');
 const { validateJWT } = require('../middlewares/validateJWT');
 
 const router = Router();
@@ -15,5 +15,7 @@ router.put(
 
 router.delete('/:imageId', deleteImage)
 
+
+router.get('/byProduct/:productId',  getImagesByProduct)
 
 module.exports = router;
