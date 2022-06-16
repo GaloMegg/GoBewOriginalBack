@@ -1,10 +1,10 @@
 const Image = require('../models/Images')
 
-const createImage =async (req, res) => {
-    const {  productId, imageName, imageAlt, imageOrder, imageIsPrimary } = req.body;
+const createImage = async (req, res) => {
+    const { productId, imageName, imageAlt, imageOrder, imageIsPrimary } = req.body;
 
     try {
-        const newImage = new Image({productId, imageName, imageAlt, imageOrder, imageIsPrimary});
+        const newImage = new Image({ productId, imageName, imageAlt, imageOrder, imageIsPrimary });
         await newImage.save();
         res.status(201).json({
             err: 'ok',
@@ -20,11 +20,11 @@ const createImage =async (req, res) => {
 
 
 const updateImage = async (req, res) => {
-        
+
     const { imageId, productId, imageName, imageAlt, imageOrder, imageIsPrimary } = req.body;
 
     try {
-        const ImageToUpdate = {productId, imageName, imageAlt, imageOrder, imageIsPrimary};
+        const ImageToUpdate = { productId, imageName, imageAlt, imageOrder, imageIsPrimary };
         // console.log(ImageToUpdate);
         await Image.findByIdAndUpdate(imageId, ImageToUpdate, { new: true });
         res.status(201).json({
@@ -40,15 +40,15 @@ const updateImage = async (req, res) => {
 }
 
 
-const deleteImage =async (req, res) => {
-    const {  imageId } = req.params;
+const deleteImage = async (req, res) => {
+    const { imageId } = req.params;
 
     try {
-        
+
         await Image.findByIdAndDelete(imageId);
         res.status(201).json({
             err: 'ok',
-            
+
         });
     } catch (error) {
         res.status(501).json({
@@ -58,10 +58,10 @@ const deleteImage =async (req, res) => {
     }
 }
 
-const getImagesByProduct =async (req, res) => {
+const getImagesByProduct = async (req, res) => {
     const { productId } = req.params;
     try {
-        const imgs = await Image.find({productId});
+        const imgs = await Image.find({ productId });
         res.status(201).json({
             err: true,
             imgs
