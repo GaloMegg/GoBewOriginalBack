@@ -3,6 +3,7 @@ const Review = require('../models/Reviews');
 const createReview = async (req, res) => {
 
     const { productId, userId, reviewStars, reviewComment, orderId } = req.body;
+    console.log(productId, userId, reviewStars, reviewComment, orderId);
 
     try {
         const review = new Review({
@@ -59,7 +60,7 @@ const listOrderReviews = async (req, res) => {
             msg: error
         })
     }
-            
+
 }
 
 module.exports = {
