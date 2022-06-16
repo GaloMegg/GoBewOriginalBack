@@ -203,7 +203,6 @@ const orderEntered = async (req, res) => {
 //Estado 2 => PAGO ACEPTADO
 const orderPaid = async (req, res) => {
     const { external_reference, payment_id, payment_type } = req.query;
-    console.log("paid", req.query);
 
     try {
         await updateOrderState(external_reference, 2, payment_id, payment_type)
@@ -223,7 +222,6 @@ const orderPaid = async (req, res) => {
 //Estado 5 => PAGO RECHAZADO
 const orderPaidRejected = async (req, res) => {
     const { external_reference } = req.query;
-    console.log("rejected", req.query)
     // console.log(external_reference)
     try {
         await updateOrderState(external_reference, 5)
@@ -243,7 +241,6 @@ const orderPaidRejected = async (req, res) => {
 //Estado 7 => PAGO PENDIENTE
 const orderPaidPending = async (req, res) => {
     const { external_reference } = req.query;
-    console.log(req.query)
 
     try {
         await updateOrderState(external_reference, 7)

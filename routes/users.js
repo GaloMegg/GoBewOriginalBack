@@ -2,7 +2,7 @@ const { Router } = require('express');
 const { check } = require('express-validator');
 const mongoose = require("mongoose");
 const User = require('../models/Users');
-const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta, userAdminResetPassMail, userResetPassMail, userCheckResetPassword, userChangePassword } = require('../controllers/user');
+const { createUser, updateUser, loginUser, loginUserGoogle, loginUserAdmin, renewToken, updateUserActiveState, userActivateCta, userAdminResetPassMail, userResetPassMail, userCheckResetPassword, userChangePassword, userIsGoogleByMail } = require('../controllers/user');
 const { validateFields } = require('../middlewares/validateFields');
 const { firstNameReq, lastNameReq, idInvalid } = require('../controllers/errMsg');
 const { validateJWT } = require('../middlewares/validateJWT');
@@ -114,6 +114,8 @@ router.post(
     loginUserAdmin
 )
 // router.get('/adminRenew',validateJWT, renewToken);
+router.get('/userIsGoogleByMail/:userEmail',  userIsGoogleByMail);
+
 router.get('/renew', validateJWT, renewToken);
 
 router.get('/activate/:userId/:hash/:userEmail', userActivateCta);

@@ -8,19 +8,45 @@ const router = Router();
 //TODO: validar datos antes de insertar
 
 router.post('/new', async (req, res) => {
+    const { categoryName, categoryIsActive, categorySupId } = req.body;
+    
     try {
-        const newCategory = new Categories(req.body)
+        console.log({ categoryName, categoryIsActive, categorySupId })
+        const newCategory = new Categories({ categoryName, categoryIsActive, categorySupId: categorySupId ===  '' ? null : categorySupId });
         await newCategory.save()
 
         res.status(201).json({
             ok: true,
-            category: newCategory
+            // category: newCategory
+            category:{ 
+                categoryId: newCategory._id,
+                categoryName:newCategory.categoryName, 
+                categoryIsActive: newCategory.categoryIsActive, 
+                categorySupId: newCategory.categorySupId ===  null ? '' : newCategory.categorySupId }
         })
     } catch (error) {
         res.json({
             ok: false,
             msg: error
         })
+    }
+})
+router.get('/superiores', async (req, res) => {
+    
+    try {
+        const superiores = await Categories
+            .find({ categorySupId: null }).select('categoryName categoryId')
+        // console.log(superiores)
+        res.status(201).json({
+            ok: true,
+            superiores
+        });
+    } catch (error) {
+        res.status(404).json({
+            ok: false,
+            msg: error
+        })
+
     }
 })
 
@@ -77,9 +103,11 @@ router.get('/bySup/:categoryId', async (req, res) => {
 
 router.put('/:categoryId', async (req, res) => {
     const { categoryId } = req.params;
+    const { categoryName, categoryIsActive, categorySupId } = req.body;
+    console.log(req.body)
     try {
         const category = await Categories
-            .findByIdAndUpdate(categoryId, req.body)
+            .findByIdAndUpdate(categoryId, { categoryName, categoryIsActive, categorySupId: categorySupId ===  '' ? null : categorySupId })
 
         res.status(201).json(category);
     } catch (error) {
